@@ -48,8 +48,8 @@ class TestController {
     def postCreateTest(@RequestBody Object test, HttpServletRequest request) {
         Test newTest = testService.createTest(test)
         if (newTest instanceof Exception) {
-            logger.error("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.BAD_REQUEST}; message: Некорректный запрос / Тест не найден; stackTrace: ${newTest.getStackTrace()}")
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST }; message: Некорректный запрос / Тест не найден")
+            logger.error("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.BAD_REQUEST}; message: Некорректный запрос; stackTrace: ${newTest.getStackTrace()}")
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST }; message: Некорректный запрос")
         }
         logger.info("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Тест создан - ${newTest.id}")
         return newTest.id
