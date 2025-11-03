@@ -6,15 +6,18 @@ import jakarta.persistence.Id
 import jakarta.persistence.Table
 
 @Entity
-@Table(name="profile", schema="public")
+@Table(name="profile", schema="load_test_helper")
 class Profile {
     @Id
     @Column(name="name",nullable=false)
     String name
+
     @Column(name="throughput",nullable=false)
     Double throughput
+
     @Column(name="threads",nullable=false)
     Integer threads
+
     @Column(name="ramp_up",nullable=false)
     Integer rampUp
 

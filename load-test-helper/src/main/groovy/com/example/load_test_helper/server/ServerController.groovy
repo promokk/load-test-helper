@@ -36,7 +36,7 @@ class ServerController {
     // Поиск сервера по name
     @GetMapping("/{name}")
     def getServerById(@PathVariable("name") String name, HttpServletRequest request) {
-        if (profileRepository.findById(name)) {
+        if (serverRepository.findById(name)) {
             logger.info("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Успех")
             return serverRepository.findById(name)
         } else {
@@ -128,8 +128,8 @@ class ServerController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST}; message: Нужное количество свободных серверов не найдено - ${servers[0]}. Доступно: ${servers[1]}")
             }
             if (servers instanceof Exception) {
-                logger.error("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.BAD_REQUEST}; message: Некорректный запрос / Профиль не найден; stackTrace: ${servers.getStackTrace()}")
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST }; message: Некорректный запрос / Профиль не найден")
+                logger.error("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.BAD_REQUEST}; message: Некорректный запрос; stackTrace: ${servers.getStackTrace()}")
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST }; message: Некорректный запрос")
             }
             logger.info("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: ${servers}")
             return servers

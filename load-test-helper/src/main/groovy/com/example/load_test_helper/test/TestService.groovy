@@ -16,10 +16,16 @@ class TestService {
     // Создать тест
     def createTest(Object test) {
         try {
-            ArrayList profile = profileService.profileCalculation(test["profile"])
+            List<String> profile = []
+            List<String> profileArr = profileService.profileCalculation(test["profile"])
+            for (List<String> p : profileArr) {
+                profile += p.join(",")
+            }
+            ArrayList server = test["server"].split(",")
             Test newTest = new Test(
                     test["stand"],
-                    test["server"],
+                    test["duration"],
+                    server,
                     profile
             )
             startupRepository.save(newTest)
