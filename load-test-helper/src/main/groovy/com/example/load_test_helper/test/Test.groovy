@@ -34,12 +34,12 @@ class Test {
     Integer duration
 
     @ElementCollection
-    @CollectionTable(name = "string_item", schema="load_test_helper")
+    @CollectionTable(name = "test_server", schema="load_test_helper")
     @Column(name="server")
     List<String> server
 
     @ElementCollection
-    @CollectionTable(name = "string_item", schema="load_test_helper")
+    @CollectionTable(name = "test_profile", schema="load_test_helper")
     @Column(name="profile")
     List<String> profile
 

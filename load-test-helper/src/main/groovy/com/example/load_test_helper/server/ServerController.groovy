@@ -105,13 +105,23 @@ class ServerController {
     @PostMapping("/serverBooking/{cnt}")
     def postServerBookingCnt(@PathVariable("cnt") String cnt, HttpServletRequest request) {
         try {
-            def servers = serverService.serverBookingCnt(cnt)
-            if (servers instanceof ArrayList) {
-                logger.error("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.BAD_REQUEST}; message: Нужное количество свободных серверов не найдено - ${servers[0]}. Доступно: ${servers[1]}")
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST}; message: Нужное количество свободных серверов не найдено - ${servers[0]}. Доступно: ${servers[1]}")
+            if (cnt.isInteger()) {
+                def servers = serverService.serverBookingCnt(cnt)
+                if (servers instanceof ArrayList) {
+                    logger.error("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.BAD_REQUEST}; message: Нужное количество свободных серверов не найдено - ${servers[0]}. Доступно: ${servers[1]}")
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST}; message: Нужное количество свободных серверов не найдено - ${servers[0]}. Доступно: ${servers[1]}")
+                }
+                logger.info("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: ${servers}")
+                return servers
+            } else {
+                def serverBusy = serverService.serverBooking(cnt)
+                if (!serverBusy) {
+                    logger.info("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: ${cnt}")
+                    return cnt
+                }
+                logger.error("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.BAD_REQUEST}; message: Сервера забронированы(b) / не найдены(nf): ${serverBusy}")
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST}; message: Сервера забронированы(b) / не найдены(nf): ${serverBusy}")
             }
-            logger.info("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: ${servers}")
-            return servers
         } catch (ex) {
             logger.error("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.INTERNAL_SERVER_ERROR}; message: ${ex.getMessage()}; stackTrace: ${ex.getStackTrace()}")
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("${HttpStatus.INTERNAL_SERVER_ERROR }; message: Непредвиденная ошибка")

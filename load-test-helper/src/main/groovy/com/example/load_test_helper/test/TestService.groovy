@@ -19,7 +19,7 @@ class TestService {
             List<String> profile = []
             List<String> profileArr = profileService.profileCalculation(test["profile"])
             for (List<String> p : profileArr) {
-                profile += p.join(",")
+                profile += p.join(":")
             }
             ArrayList server = test["server"].split(",")
             Test newTest = new Test(

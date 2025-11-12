@@ -43,4 +43,27 @@ class ServerService {
         }
         return serverBookingCnt(Math.ceil(threadMax / 2000).toInteger().toString())
     }
+
+    // Бронирование списка серверов
+    def serverBooking(String servers) {
+        def serverBusy = ""
+        def serversArr = servers.split(",")
+        for (s in serversArr) {
+            def server = serverRepository.findById(s)
+            if (!server) {
+                serverBusy += "${s}-nf,"
+            } else if (!server.get().free) {
+                serverBusy += "${s}-b,"
+            }
+        }
+        if (serverBusy) {
+            return serverBusy.substring(0, serverBusy.length() - 1)
+        }
+        for (s in serversArr) {
+            Server server = serverRepository.findById(s).get()
+            server.free = false
+            serverRepository.save(server)
+        }
+        return serverBusy
+    }
 }
