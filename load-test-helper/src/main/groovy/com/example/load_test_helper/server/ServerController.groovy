@@ -101,15 +101,15 @@ class ServerController {
         }
     }
 
-    // Бронирование N серверов
+    // Бронирование N серверов / список серверов
     @PostMapping("/serverBooking/{cnt}")
     def postServerBookingCnt(@PathVariable("cnt") String cnt, HttpServletRequest request) {
         try {
             if (cnt.isInteger()) {
                 def servers = serverService.serverBookingCnt(cnt)
-                if (servers instanceof ArrayList) {
-                    logger.error("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.BAD_REQUEST}; message: Нужное количество свободных серверов не найдено - ${servers[0]}. Доступно: ${servers[1]}")
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST}; message: Нужное количество свободных серверов не найдено - ${servers[0]}. Доступно: ${servers[1]}")
+                if (servers[0] instanceof Exception) {
+                    logger.error("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.BAD_REQUEST}; message: Нужное количество свободных серверов не найдено - ${servers[1]}. Доступно: ${servers[2]}")
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST}; message: Нужное количество свободных серверов не найдено - ${servers[1]}. Доступно: ${servers[2]}")
                 }
                 logger.info("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: ${servers}")
                 return servers
@@ -117,7 +117,7 @@ class ServerController {
                 def serverBusy = serverService.serverBooking(cnt)
                 if (!serverBusy) {
                     logger.info("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: ${cnt}")
-                    return cnt
+                    return cnt.split(",")
                 }
                 logger.error("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.BAD_REQUEST}; message: Сервера забронированы(b) / не найдены(nf): ${serverBusy}")
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST}; message: Сервера забронированы(b) / не найдены(nf): ${serverBusy}")
@@ -133,7 +133,7 @@ class ServerController {
     def postServerBookingAuto(@RequestParam("profiles") String profiles, HttpServletRequest request) {
         try {
             def servers = serverService.serverBookingAuto(profiles)
-            if (servers instanceof ArrayList) {
+            if (servers instanceof Boolean) {
                 logger.error("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.BAD_REQUEST}; message: Нужное количество свободных серверов не найдено - ${servers[0]}. Доступно: ${servers[1]}")
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST}; message: Нужное количество свободных серверов не найдено - ${servers[0]}. Доступно: ${servers[1]}")
             }

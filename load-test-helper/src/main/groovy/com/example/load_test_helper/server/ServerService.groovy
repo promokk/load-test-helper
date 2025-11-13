@@ -17,16 +17,16 @@ class ServerService {
     def serverBookingCnt(String cnt) {
         Iterable<Server> servers = serverRepository.findByFree(true)
         try {
-            String strFree = ""
+            ArrayList serverArr = []
             Integer count = cnt.toInteger()
             for (server in servers[0..count-1]) {
-                strFree += "${server.name},"
+                serverArr += server.name
                 server.free = false
                 serverRepository.save(server)
             }
-            return strFree.substring(0, strFree.length() - 1)
+            return serverArr
         } catch (ex) {
-            return [cnt, servers.size()]
+            return [ex, cnt, servers.size()]
         }
     }
 
@@ -35,7 +35,7 @@ class ServerService {
         def threadMax = 0
         def profilesArr = profileService.profileCalculation(profiles)
         if (profilesArr instanceof Exception) {
-            return profilesArr
+            return false
         }
         for (profile in profilesArr) {
             def threadCount = profile[2].toInteger()
