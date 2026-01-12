@@ -21,11 +21,10 @@ class TestService {
             for (List<String> p : profileArr) {
                 profile += p.join(":")
             }
-            ArrayList server = test["server"].split(",")
             Test newTest = new Test(
                     test["stand"],
                     test["duration"],
-                    server,
+                    test["server"],
                     profile
             )
             startupRepository.save(newTest)

@@ -153,7 +153,7 @@ class ServerController {
     @PostMapping("/serverBooking/cancel")
     def postServerBookingCancel(@RequestParam("server") String serverStr, HttpServletRequest request) {
         try {
-            String[] serverArr = serverStr.split(",")
+            List<String> serverArr = serverStr.split(",")
             for (serverName in serverArr) {
                 try {
                     serverRepository.findById(serverName).get()
@@ -162,11 +162,7 @@ class ServerController {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST}; message: Сервер ${serverName} не найден")
                 }
             }
-            for (serverName in serverArr) {
-                Server server = serverRepository.findById(serverName).get()
-                server.free = true
-                serverRepository.save(server)
-            }
+            serverService.serverBookingCancel(serverArr)
             logger.info("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: операция выполнена для ${serverArr}")
             return ResponseEntity.status(HttpStatus.OK).body("message: операция выполнена для ${serverArr}")
         } catch (ex) {
@@ -179,12 +175,7 @@ class ServerController {
     @PostMapping("/serverBooking/cancel/all")
     def postServerBookingCancelAll(HttpServletRequest request) {
         try {
-            Iterable<Server> servers = serverRepository.findByFree(false)
-            Integer serversCnt = servers.size()
-            for (server in servers) {
-                server.free = true
-                serverRepository.save(server)
-            }
+            Integer serversCnt = serverService.serverBookingCancelAll()
             logger.info("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Операция выполнена для всех забронированных серверов, кол-во: ${serversCnt}")
             return ResponseEntity.status(HttpStatus.OK).body("message: Операция выполнена для всех забронированных серверов, кол-во: ${serversCnt}")
         } catch (ex) {

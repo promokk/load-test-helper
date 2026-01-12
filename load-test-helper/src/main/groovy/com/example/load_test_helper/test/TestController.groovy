@@ -1,5 +1,6 @@
 package com.example.load_test_helper.test
 
+import com.example.load_test_helper.server.ServerService
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -18,10 +19,12 @@ class TestController {
     def logger = LoggerFactory.getLogger(getClass())
     private final TestRepository testRepository
     private final TestService testService
+    private final ServerService serverService
 
-    TestController(TestRepository testRepository, TestService testService) {
+    TestController(TestRepository testRepository, TestService testService, ServerService serverService) {
         this.testRepository = testRepository
         this.testService = testService
+        this.serverService = serverService
     }
 
     // Список тестов
@@ -59,8 +62,10 @@ class TestController {
     @DeleteMapping("/delete/{id}")
     def deleteTest(@PathVariable("id") Integer id, HttpServletRequest request) {
         if (testRepository.findById(id)) {
-            logger.info("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Тест удален - ${id}")
+            def server = testRepository.findById(id).get().server
+            serverService.serverBookingCancel(server)
             testRepository.deleteById(id)
+            logger.info("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Тест удален - ${id}")
             return ResponseEntity.noContent().build()
         } else {
             logger.info("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.NOT_FOUND}; message: Тест не найден - ${id}")
@@ -71,8 +76,9 @@ class TestController {
     // Удалить все тесты
     @DeleteMapping("/delete/all")
     def deleteTestAll(HttpServletRequest request) {
-        logger.info("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Все тесты удалены")
+        serverService.serverBookingCancelAll()
         testRepository.deleteAll()
+        logger.info("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Все тесты удалены")
         return ResponseEntity.noContent().build()
     }
 }

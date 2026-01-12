@@ -25,7 +25,7 @@ class ProfileService {
                     profilesArr[i] = params
                 } else {
                     // проверка - существует профиль в БД
-                    profileRepository.findById(params[0]).get()
+                    // profileRepository.findById(params[0]).get()
                     params[1] = (params[1].toDouble() / serverCount).round(5)
                     params[2] = Math.ceil(params[2].toDouble() / serverCount).toInteger()
                     profilesArr[i] = params

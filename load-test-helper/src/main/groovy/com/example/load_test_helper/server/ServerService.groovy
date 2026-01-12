@@ -66,4 +66,23 @@ class ServerService {
         }
         return serverBusy
     }
+
+    // Отмена бронирования N серверов
+    def serverBookingCancel(List<String> serverArr) {
+        for (serverName in serverArr) {
+            Server server = serverRepository.findById(serverName).get()
+            server.free = true
+            serverRepository.save(server)
+        }
+    }
+
+    // Отмена бронирования всех серверов
+    def serverBookingCancelAll() {
+        Iterable<Server> servers = serverRepository.findByFree(false)
+        for (server in servers) {
+            server.free = true
+            serverRepository.save(server)
+        }
+        return servers.size()
+    }
 }
