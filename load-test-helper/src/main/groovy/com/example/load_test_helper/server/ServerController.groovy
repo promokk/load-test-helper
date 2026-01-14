@@ -193,7 +193,7 @@ class ServerController {
             serverRepository.deleteById(name)
             return ResponseEntity.noContent().build()
         } else {
-            logger.info("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.NOT_FOUND}; message: Сервер не найден - ${name}")
+            logger.error("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.NOT_FOUND}; message: Сервер не найден - ${name}")
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("${HttpStatus.NOT_FOUND }; message: Сервер не найден - ${name}")
         }
     }

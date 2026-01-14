@@ -41,7 +41,7 @@ class TestController {
             logger.info("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Успех")
             return testRepository.findById(id)
         } else {
-            logger.info("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.NOT_FOUND}; message: Тест не найден - ${id}")
+            logger.error("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.NOT_FOUND}; message: Тест не найден - ${id}")
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("${HttpStatus.NOT_FOUND }; message: Тест не найден - ${id}")
         }
     }
@@ -61,14 +61,11 @@ class TestController {
     // Удалить тест
     @DeleteMapping("/delete/{id}")
     def deleteTest(@PathVariable("id") Integer id, HttpServletRequest request) {
-        if (testRepository.findById(id)) {
-            def server = testRepository.findById(id).get().server
-            serverService.serverBookingCancel(server)
-            testRepository.deleteById(id)
+        if (testService.deleteTest(id)) {
             logger.info("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Тест удален - ${id}")
             return ResponseEntity.noContent().build()
         } else {
-            logger.info("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.NOT_FOUND}; message: Тест не найден - ${id}")
+            logger.error("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.NOT_FOUND}; message: Тест не найден - ${id}")
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("${HttpStatus.NOT_FOUND }; message: Тест не найден - ${id}")
         }
     }
