@@ -1,5 +1,7 @@
 package com.example.load_test_helper.scenario
 
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
@@ -14,32 +16,30 @@ import com.example.load_test_helper.group.Group
 @Table(name="scenario", schema="load_test_helper")
 class Scenario {
     @Id
-    @Column(name="name",nullable=false)
+    @Column(name="name", nullable=false)
     String name
 
-    @Column(name="stand",nullable=false)
+    @Column(name="stand", nullable=false)
     String stand
 
-    @Column(name="draft",nullable=false)
+    @Column(name="draft", nullable=false)
     Boolean draft
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @Column(name="group",nullable=false)
-    List<Group> group
+    @OneToMany(mappedBy = "scenario", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Column(name="group")
+    List<Group> group = []
 
     Scenario() {}
 
-    Scenario(String name, String stand, List<Group> group) {
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    Scenario(@JsonProperty("name") String name,
+            @JsonProperty("stand") String stand,
+            @JsonProperty("draft") Boolean draft,
+            @JsonProperty("group") List<Group> group) {
         this.name = name
         this.stand = stand
-        this.group = group
-        this.draft = true
-    }
-
-    Scenario(String name, String stand, Boolean draft, List<Group> group) {
-        this.name = name
-        this.stand = stand
-        this.group = group
         this.draft = draft
+        this.group = group
+        this.group.forEach { it.scenario = this }
     }
 }

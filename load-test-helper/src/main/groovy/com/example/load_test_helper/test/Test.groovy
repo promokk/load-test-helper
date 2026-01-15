@@ -18,21 +18,21 @@ import java.time.LocalDateTime
 class Test {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @Column(name="id",nullable=false)
+    @Column(name="id", nullable=false)
     Integer id
 
     @JsonFormat(pattern = "dd-MM-yyyy'T'HH:mm:ss")
-    @Column(name="createdAt",nullable=false)
+    @Column(name="createdAt", nullable=false)
     LocalDateTime createdAt
 
     @JsonFormat(pattern = "dd-MM-yyyy'T'HH:mm:ss")
-    @Column(name="endedAt",nullable=false)
+    @Column(name="endedAt", nullable=false)
     LocalDateTime endedAt
 
-    @Column(name="stand",nullable=false)
+    @Column(name="stand", nullable=false)
     String stand
 
-    @Column(name="duration",nullable=false)
+    @Column(name="duration", nullable=false)
     Integer duration
 
     @ElementCollection

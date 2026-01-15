@@ -9,16 +9,16 @@ import jakarta.persistence.Table
 @Table(name="profile", schema="load_test_helper")
 class Profile {
     @Id
-    @Column(name="name",nullable=false)
+    @Column(name="name", nullable=false)
     String name
 
-    @Column(name="throughput",nullable=false)
+    @Column(name="throughput", nullable=false)
     Double throughput
 
-    @Column(name="threads",nullable=false)
+    @Column(name="threads", nullable=false)
     Integer threads
 
-    @Column(name="ramp_up",nullable=false)
+    @Column(name="ramp_up", nullable=false)
     Integer rampUp
 
     Profile() {}

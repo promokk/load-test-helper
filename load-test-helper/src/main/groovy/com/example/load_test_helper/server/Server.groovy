@@ -9,10 +9,10 @@ import jakarta.persistence.Table
 @Table(name="server", schema="load_test_helper")
 class Server {
     @Id
-    @Column(name="name",nullable=false)
+    @Column(name="name", nullable=false)
     String name
 
-    @Column(name="free",nullable=false)
+    @Column(name="free", nullable=false)
     Boolean free
 
     Server() {}
