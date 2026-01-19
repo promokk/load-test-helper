@@ -101,17 +101,27 @@ class ServerController {
         }
     }
 
-    // Бронирование N серверов
+    // Бронирование N серверов / список серверов
     @PostMapping("/serverBooking/{cnt}")
     def postServerBookingCnt(@PathVariable("cnt") String cnt, HttpServletRequest request) {
         try {
-            def servers = serverService.serverBookingCnt(cnt)
-            if (servers instanceof ArrayList) {
-                logger.error("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.BAD_REQUEST}; message: Нужное количество свободных серверов не найдено - ${servers[0]}. Доступно: ${servers[1]}")
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST}; message: Нужное количество свободных серверов не найдено - ${servers[0]}. Доступно: ${servers[1]}")
+            if (cnt.isInteger()) {
+                def servers = serverService.serverBookingCnt(cnt)
+                if (servers[0] instanceof Exception) {
+                    logger.error("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.BAD_REQUEST}; message: Нужное количество свободных серверов не найдено - ${servers[1]}. Доступно: ${servers[2]}")
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST}; message: Нужное количество свободных серверов не найдено - ${servers[1]}. Доступно: ${servers[2]}")
+                }
+                logger.info("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: ${servers}")
+                return servers
+            } else {
+                def serverBusy = serverService.serverBooking(cnt)
+                if (!serverBusy) {
+                    logger.info("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: ${cnt}")
+                    return cnt.split(",")
+                }
+                logger.error("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.BAD_REQUEST}; message: Сервера забронированы(b) / не найдены(nf): ${serverBusy}")
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST}; message: Сервера забронированы(b) / не найдены(nf): ${serverBusy}")
             }
-            logger.info("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: ${servers}")
-            return servers
         } catch (ex) {
             logger.error("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.INTERNAL_SERVER_ERROR}; message: ${ex.getMessage()}; stackTrace: ${ex.getStackTrace()}")
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("${HttpStatus.INTERNAL_SERVER_ERROR }; message: Непредвиденная ошибка")
@@ -123,7 +133,7 @@ class ServerController {
     def postServerBookingAuto(@RequestParam("profiles") String profiles, HttpServletRequest request) {
         try {
             def servers = serverService.serverBookingAuto(profiles)
-            if (servers instanceof ArrayList) {
+            if (servers instanceof Boolean) {
                 logger.error("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.BAD_REQUEST}; message: Нужное количество свободных серверов не найдено - ${servers[0]}. Доступно: ${servers[1]}")
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST}; message: Нужное количество свободных серверов не найдено - ${servers[0]}. Доступно: ${servers[1]}")
             }
@@ -143,7 +153,7 @@ class ServerController {
     @PostMapping("/serverBooking/cancel")
     def postServerBookingCancel(@RequestParam("server") String serverStr, HttpServletRequest request) {
         try {
-            String[] serverArr = serverStr.split(",")
+            List<String> serverArr = serverStr.split(",")
             for (serverName in serverArr) {
                 try {
                     serverRepository.findById(serverName).get()
@@ -152,11 +162,7 @@ class ServerController {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST}; message: Сервер ${serverName} не найден")
                 }
             }
-            for (serverName in serverArr) {
-                Server server = serverRepository.findById(serverName).get()
-                server.free = true
-                serverRepository.save(server)
-            }
+            serverService.serverBookingCancel(serverArr)
             logger.info("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: операция выполнена для ${serverArr}")
             return ResponseEntity.status(HttpStatus.OK).body("message: операция выполнена для ${serverArr}")
         } catch (ex) {
@@ -169,12 +175,7 @@ class ServerController {
     @PostMapping("/serverBooking/cancel/all")
     def postServerBookingCancelAll(HttpServletRequest request) {
         try {
-            Iterable<Server> servers = serverRepository.findByFree(false)
-            Integer serversCnt = servers.size()
-            for (server in servers) {
-                server.free = true
-                serverRepository.save(server)
-            }
+            Integer serversCnt = serverService.serverBookingCancelAll()
             logger.info("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Операция выполнена для всех забронированных серверов, кол-во: ${serversCnt}")
             return ResponseEntity.status(HttpStatus.OK).body("message: Операция выполнена для всех забронированных серверов, кол-во: ${serversCnt}")
         } catch (ex) {
@@ -192,7 +193,7 @@ class ServerController {
             serverRepository.deleteById(name)
             return ResponseEntity.noContent().build()
         } else {
-            logger.info("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.NOT_FOUND}; message: Сервер не найден - ${name}")
+            logger.error("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.NOT_FOUND}; message: Сервер не найден - ${name}")
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("${HttpStatus.NOT_FOUND }; message: Сервер не найден - ${name}")
         }
     }

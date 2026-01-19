@@ -40,7 +40,7 @@ class ProfileController {
             logger.info("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Успех")
             return profileRepository.findById(name)
         } else {
-            logger.info("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.NOT_FOUND}; message: Профиль не найден - ${name}")
+            logger.error("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.NOT_FOUND}; message: Профиль не найден - ${name}")
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("${HttpStatus.NOT_FOUND }; message: Профиль не найден - ${name}")
         }
     }
@@ -51,8 +51,8 @@ class ProfileController {
         Integer serverCount = cnt.toInteger()
         def profile = profileService.profileCalculation(profileName, serverCount)
         if (profile instanceof Exception) {
-            logger.error("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.BAD_REQUEST}; message: Некорректный запрос / Профиль не найден; stackTrace: ${profile.getStackTrace()}")
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST }; message: Некорректный запрос / Профиль не найден")
+            logger.error("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.BAD_REQUEST}; message: Некорректный запрос; stackTrace: ${profile.getStackTrace()}")
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST }; message: Некорректный запрос")
         }
         logger.info("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: ${profile}")
         return profile
@@ -83,7 +83,7 @@ class ProfileController {
             profileRepository.deleteById(name)
             return ResponseEntity.noContent().build()
         } else {
-            logger.info("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.NOT_FOUND}; message: Профиль не найден - ${name}")
+            logger.error("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.NOT_FOUND}; message: Профиль не найден - ${name}")
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("${HttpStatus.NOT_FOUND }; message: Профиль не найден - ${name}")
         }
     }
