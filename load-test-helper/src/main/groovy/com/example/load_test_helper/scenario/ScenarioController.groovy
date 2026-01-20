@@ -1,5 +1,7 @@
 package com.example.load_test_helper.scenario
 
+import com.example.load_test_helper.exception.BadRequestException
+import com.example.load_test_helper.exception.NotFoundException
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -27,52 +29,46 @@ class ScenarioController {
     // Список сценариев
     @GetMapping
     def getScenarios(HttpServletRequest request) {
-        logger.info("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Успех")
         return scenarioRepository.findAll()
     }
 
     // Поиск сценария по name
     @GetMapping("/{name}")
     def getTestById(@PathVariable("name") String name, HttpServletRequest request) {
-        if (scenarioRepository.findById(name)) {
-            logger.info("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Успех")
-            return scenarioRepository.findById(name)
-        } else {
-            logger.error("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.NOT_FOUND}; message: Сценарий не найден - ${name}")
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("${HttpStatus.NOT_FOUND }; message: Сценарий не найден - ${name}")
-        }
+        if (!scenarioRepository.findById(name))
+            throw new NotFoundException("Сценарий не найден - ${name}", request.method, request.requestURI)
+        return scenarioRepository.findById(name)
     }
 
     // Добавить профиль
     @PostMapping("/add")
     def addScenario(@RequestBody Scenario scenario, HttpServletRequest request) {
-        logger.info("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Сценарий добавлен - ${scenario.name}")
-        return scenarioRepository.save(scenario)
+        if (scenario.name == null || scenario.stand == null || scenario.draft == null || scenario.group == null)
+            throw new BadRequestException("Неверное тело запроса. Обязательные поля: name, stand, draft, group",
+                    request.method, request.requestURI)
+        if (scenario.group.any{it.profile == null || it.server == null || it.url == null})
+            throw new BadRequestException("Неверное тело запроса. Обязательные поля group: profile, server, url",
+                    request.method, request.requestURI)
+        def newScenario = scenarioRepository.save(scenario)
+        logger.info("${request.method} ${request.requestURI}; message: Сценарий добавлен - ${scenario.name}")
+        return newScenario
     }
 
     // Удалить сценарий
     @DeleteMapping("/{name}")
     def deleteScenario(@PathVariable("name") String name, HttpServletRequest request) {
-        if (scenarioRepository.findById(name)) {
-            logger.info("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Сценарий удален - ${name}")
-            scenarioRepository.deleteById(name)
-            return ResponseEntity.noContent().build()
-        } else {
-            logger.error("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.NOT_FOUND}; message: Сценарий не найден - ${name}")
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("${HttpStatus.NOT_FOUND }; message: Сценарий не найден - ${name}")
-        }
+        if (!scenarioRepository.findById(name))
+            throw new NotFoundException("Сценарий не найден - ${name}", request.method, request.requestURI)
+        scenarioRepository.deleteById(name)
+        logger.info("${request.method} ${request.requestURI}; message: Сценарий удален - ${name}")
+        return ResponseEntity.noContent().build()
     }
 
     // Удалить все черновые сценарии
     @DeleteMapping("/draft/deleteAll")
     def deleteDraftAll(HttpServletRequest request) {
-        try {
-            List<String> scenarioDelArr = scenarioService.deleteDraftAll()
-            logger.info("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Удалено ${scenarioDelArr.size()}: ${scenarioDelArr}")
-            return ResponseEntity.status(HttpStatus.OK).body("message: Удалено ${scenarioDelArr.size()}: ${scenarioDelArr}")
-        } catch (ex) {
-            logger.error("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.INTERNAL_SERVER_ERROR}; message: ${ex.getMessage()}; stackTrace: ${ex.getStackTrace()}")
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("${HttpStatus.INTERNAL_SERVER_ERROR }; message: Непредвиденная ошибка")
-        }
+        List<String> scenarioDelArr = scenarioService.deleteDraftAll()
+        logger.info("${request.method} ${request.requestURI}; message: Удалено ${scenarioDelArr.size()}: ${scenarioDelArr}")
+        return ResponseEntity.status(HttpStatus.OK).body("message: Удалено ${scenarioDelArr.size()}: ${scenarioDelArr}")
     }
 }
