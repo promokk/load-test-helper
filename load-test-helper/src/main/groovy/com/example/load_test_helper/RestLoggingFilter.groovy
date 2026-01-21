@@ -16,17 +16,18 @@ class RestLoggingFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) {
         try {
             // Перед началом обработки
-            log.info("Request {} {}",
+            log.info("Request -- {} {}",
                     request.method, request.requestURI)
 
             // Выполнение основного потока обработки
             chain.doFilter(request, response)
 
             // После окончания обработки
-            log.info("Response {} {}; status: {}",
+            log.info("Response -- {} {}; status: {}",
                     request.method, request.requestURI, response.status)
         } catch (Throwable t) {
-            log.error("Ошибка при обработке запроса:", t)
+            log.error("{} {}; message: Ошибка при обработке запроса:",
+                    request.method, request.requestURI, t)
         }
     }
 }

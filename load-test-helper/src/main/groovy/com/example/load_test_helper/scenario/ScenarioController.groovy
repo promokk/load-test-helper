@@ -28,7 +28,7 @@ class ScenarioController {
 
     // Список сценариев
     @GetMapping
-    def getScenarios(HttpServletRequest request) {
+    def getScenarios() {
         return scenarioRepository.findAll()
     }
 
@@ -36,20 +36,18 @@ class ScenarioController {
     @GetMapping("/{name}")
     def getTestById(@PathVariable("name") String name, HttpServletRequest request) {
         if (!scenarioRepository.findById(name))
-            throw new NotFoundException("Сценарий не найден - ${name}", request.method, request.requestURI)
+            throw new NotFoundException("Сценарий не найден - ${name}")
         return scenarioRepository.findById(name)
     }
 
-    // Добавить профиль
+    // Добавить сценарий
     @PostMapping("/add")
     def addScenario(@RequestBody Scenario scenario, HttpServletRequest request) {
         if (scenario.name == null || scenario.stand == null || scenario.draft == null || scenario.group == null)
-            throw new BadRequestException("Неверное тело запроса. Обязательные поля: name, stand, draft, group",
-                    request.method, request.requestURI)
+            throw new BadRequestException("Неверное тело запроса. Обязательные поля: name, stand, draft, group")
         if (scenario.group.any{it.profile == null || it.server == null || it.url == null})
-            throw new BadRequestException("Неверное тело запроса. Обязательные поля group: profile, server, url",
-                    request.method, request.requestURI)
-        def newScenario = scenarioRepository.save(scenario)
+            throw new BadRequestException("Неверное тело запроса. Обязательные поля group: profile, server, url")
+        Scenario newScenario = scenarioRepository.save(scenario)
         logger.info("${request.method} ${request.requestURI}; message: Сценарий добавлен - ${scenario.name}")
         return newScenario
     }
@@ -58,7 +56,7 @@ class ScenarioController {
     @DeleteMapping("/{name}")
     def deleteScenario(@PathVariable("name") String name, HttpServletRequest request) {
         if (!scenarioRepository.findById(name))
-            throw new NotFoundException("Сценарий не найден - ${name}", request.method, request.requestURI)
+            throw new NotFoundException("Сценарий не найден - ${name}")
         scenarioRepository.deleteById(name)
         logger.info("${request.method} ${request.requestURI}; message: Сценарий удален - ${name}")
         return ResponseEntity.noContent().build()

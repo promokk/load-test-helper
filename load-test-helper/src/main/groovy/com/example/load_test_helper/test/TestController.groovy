@@ -1,10 +1,13 @@
 package com.example.load_test_helper.test
 
+import com.example.load_test_helper.exception.BadRequestException
+import com.example.load_test_helper.exception.NotFoundException
 import com.example.load_test_helper.server.ServerService
 import jakarta.servlet.http.HttpServletRequest
+import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
+@Validated
 @RequestMapping("/test")
 class TestController {
     def logger = LoggerFactory.getLogger(getClass())
@@ -29,45 +33,36 @@ class TestController {
 
     // Список тестов
     @GetMapping("/info")
-    def getStartups(HttpServletRequest request) {
-        logger.info("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Успех")
+    def getStartups() {
         return testRepository.findAll()
     }
 
     // Поиск теста по id
     @GetMapping("/info/{id}")
     def getTestById(@PathVariable("id") Integer id, HttpServletRequest request) {
-        if (testRepository.findById(id)) {
-            logger.info("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Успех")
-            return testRepository.findById(id)
-        } else {
-            logger.error("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.NOT_FOUND}; message: Тест не найден - ${id}")
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("${HttpStatus.NOT_FOUND }; message: Тест не найден - ${id}")
-        }
+        if (!testRepository.findById(id))
+            throw new NotFoundException("Тест не найден - ${id}")
+        return testRepository.findById(id)
     }
 
     // Создать тест
     @PostMapping("/create")
-    def postCreateTest(@RequestBody Object test, HttpServletRequest request) {
+    def postCreateTest(@Valid @RequestBody TestDTO test, HttpServletRequest request) {
+        if (!test.validateServer())
+            throw new BadRequestException("Неверное тело запроса. Поле server != List<String>")
         Test newTest = testService.createTest(test)
-        if (newTest instanceof Exception) {
-            logger.error("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.BAD_REQUEST}; message: Некорректный запрос; stackTrace: ${newTest.getStackTrace()}")
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST }; message: Некорректный запрос")
-        }
-        logger.info("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Тест создан - ${newTest.id}")
+        logger.info("${request.method} ${request.requestURI}; message: Тест создан - ${newTest.id}")
         return newTest.id
     }
 
     // Удалить тест
     @DeleteMapping("/delete/{id}")
     def deleteTest(@PathVariable("id") Integer id, HttpServletRequest request) {
-        if (testService.deleteTest(id)) {
-            logger.info("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Тест удален - ${id}")
-            return ResponseEntity.noContent().build()
-        } else {
-            logger.error("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.NOT_FOUND}; message: Тест не найден - ${id}")
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("${HttpStatus.NOT_FOUND }; message: Тест не найден - ${id}")
-        }
+        if (!testRepository.findById(id))
+            throw new NotFoundException("Тест не найден - ${id}")
+        testService.deleteTest(id)
+        logger.info("${request.method} ${request.requestURI}; message: Тест удален - ${id}")
+        return ResponseEntity.noContent().build()
     }
 
     // Удалить все тесты
@@ -75,7 +70,7 @@ class TestController {
     def deleteTestAll(HttpServletRequest request) {
         serverService.serverBookingCancelAll()
         testRepository.deleteAll()
-        logger.info("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Все тесты удалены")
+        logger.info("${request.method} ${request.requestURI}; message: Все тесты удалены")
         return ResponseEntity.noContent().build()
     }
 }

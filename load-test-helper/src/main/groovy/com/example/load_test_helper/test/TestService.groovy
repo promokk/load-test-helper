@@ -20,7 +20,6 @@ class TestService {
 
     // Создать тест
     def createTest(Object test) {
-        try {
             List<String> profile = []
             List<String> profileArr = profileService.profileCalculation(test["profile"])
             for (List<String> p : profileArr) {
@@ -34,19 +33,16 @@ class TestService {
             )
             testRepository.save(newTest)
             return newTest
-        } catch (ex) {
-            return  ex
-        }
     }
 
     // Удалить тест
     def deleteTest(Integer id) {
-        if (testRepository.findById(id)) {
+        try {
             def server = testRepository.findById(id).get().server
             serverService.serverBookingCancel(server)
             testRepository.deleteById(id)
             return true
-        } else {
+        } catch (Exception ex) {
             return false
         }
     }
