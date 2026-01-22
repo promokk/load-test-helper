@@ -2,12 +2,12 @@ package com.example.load_test_helper.test
 
 import com.example.load_test_helper.profile.ProfileService
 import com.example.load_test_helper.server.ServerService
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
 class TestService {
+    def logger = LoggerFactory.getLogger(getClass())
     private final TestRepository testRepository
     private final ProfileService profileService
     private final ServerService serverService
@@ -20,7 +20,6 @@ class TestService {
 
     // Создать тест
     def createTest(Object test) {
-        try {
             List<String> profile = []
             List<String> profileArr = profileService.profileCalculation(test["profile"])
             for (List<String> p : profileArr) {
@@ -34,19 +33,17 @@ class TestService {
             )
             testRepository.save(newTest)
             return newTest
-        } catch (ex) {
-            return  ex
-        }
     }
 
     // Удалить тест
     def deleteTest(Integer id) {
-        if (testRepository.findById(id)) {
+        try {
             def server = testRepository.findById(id).get().server
             serverService.serverBookingCancel(server)
             testRepository.deleteById(id)
             return true
-        } else {
+        } catch (Exception ex) {
+            logger.error("TestService: deleteTest; status: ERROR; message: Ошибка ${ex.getStackTrace()}")
             return false
         }
     }

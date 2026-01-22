@@ -1,5 +1,7 @@
 package com.example.load_test_helper.server
 
+import com.example.load_test_helper.exception.BadRequestException
+import com.example.load_test_helper.exception.NotFoundException
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -10,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.http.ResponseEntity
 
@@ -28,173 +29,116 @@ class ServerController {
 
     // Список всех серверов
     @GetMapping
-    def getServers(HttpServletRequest request) {
-        logger.info("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Успех")
+    def getServers() {
         return serverRepository.findAll()
     }
 
     // Поиск сервера по name
     @GetMapping("/{name}")
-    def getServerById(@PathVariable("name") String name, HttpServletRequest request) {
-        if (serverRepository.findById(name)) {
-            logger.info("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Успех")
-            return serverRepository.findById(name)
-        } else {
-            logger.info("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.NOT_FOUND}; message: Профиль не найден - ${name}")
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("${HttpStatus.NOT_FOUND }; message: Профиль не найден - ${name}")
-        }
+    def getServerById(@PathVariable("name") String name) {
+        if (!serverRepository.findById(name))
+            throw new NotFoundException("Сервер не найден - ${name}")
+        return serverRepository.findById(name)
     }
 
     // Список свободных серверов
     @GetMapping("/free")
-    def getServerFree(@RequestParam("state") String state, HttpServletRequest request) {
-        try {
-            if (state == "true") {
-                logger.info("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Успех")
-                return serverRepository.findByFree(true)
-            } else if (state == "false") {
-                logger.info("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Успех")
-                return serverRepository.findByFree(false)
-            } else {
-                logger.error("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.BAD_REQUEST}; message: неверное состояние сервера - ${state}")
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST}; message: неверное состояние сервера - ${state}")
-            }
-        } catch (ex) {
-            logger.error("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.INTERNAL_SERVER_ERROR}; message: ${ex.getMessage()}; stackTrace: ${ex.getStackTrace()}")
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("${HttpStatus.INTERNAL_SERVER_ERROR }; message: Непредвиденная ошибка")
+    def getServerFree(@RequestParam("state") String state) {
+        if (state == "true") {
+            return serverRepository.findByFree(true)
+        } else if (state == "false") {
+            return serverRepository.findByFree(false)
+        } else {
+            throw new BadRequestException("Неверный запрос. Get-параметр state != Boolen")
         }
     }
 
     // Количество серверов
     @GetMapping("/count")
-    def getServerCount(@RequestParam("state") String state, HttpServletRequest request) {
-        try {
-            if (state == "true") {
-                logger.info("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Успех")
-                return serverRepository.findByFree(true).findAll().size()
-            } else if (state == "false") {
-                logger.info("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Успех")
-                return serverRepository.findByFree(false).findAll().size()
-            } else {
-                logger.error("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.BAD_REQUEST}; message: неверное состояние сервера - ${state}")
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST}; message: неверное состояние сервера - ${state}")
-            }
-        } catch (ex) {
-            logger.error("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.INTERNAL_SERVER_ERROR}; message: ${ex.getMessage()}; stackTrace: ${ex.getStackTrace()}")
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("${HttpStatus.INTERNAL_SERVER_ERROR }; message: Непредвиденная ошибка")
+    def getServerCount(@RequestParam("state") String state) {
+        if (state == "true") {
+            return serverRepository.findByFree(true).findAll().size()
+        } else if (state == "false") {
+            return serverRepository.findByFree(false).findAll().size()
+        } else {
+            throw new BadRequestException("Неверный запрос. Get-параметр state != Boolen")
         }
     }
 
     // Добавить сервер
     @PostMapping("/add")
-    def addServer(@RequestBody Server server, HttpServletRequest request) {
-        try {
-            logger.info("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Сервер добавлен - ${server.name}")
-            return serverRepository.save(server)
-        } catch (ex) {
-            if (ex.class.name == "org.springframework.dao.DataIntegrityViolationException") {
-                logger.error("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.BAD_REQUEST}; message: Некорректный запрос")
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST }; message: Некорректный запрос")
-            }
-            logger.error("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.INTERNAL_SERVER_ERROR}; message: ${ex.getMessage()}; stackTrace: ${ex.getStackTrace()}")
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("${HttpStatus.INTERNAL_SERVER_ERROR }; message: Непредвиденная ошибка")
-        }
+    def addServer(@RequestBody ServerDTO serverDto, HttpServletRequest request) {
+        Server server = serverService.addProfile(serverDto)
+        logger.info("${request.method} ${request.requestURI}; message: Сервер добавлен - ${server.name}")
+        return server
     }
 
     // Бронирование N серверов / список серверов
     @PostMapping("/serverBooking/{cnt}")
     def postServerBookingCnt(@PathVariable("cnt") String cnt, HttpServletRequest request) {
-        try {
-            if (cnt.isInteger()) {
-                def servers = serverService.serverBookingCnt(cnt)
-                if (servers[0] instanceof Exception) {
-                    logger.error("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.BAD_REQUEST}; message: Нужное количество свободных серверов не найдено - ${servers[1]}. Доступно: ${servers[2]}")
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST}; message: Нужное количество свободных серверов не найдено - ${servers[1]}. Доступно: ${servers[2]}")
-                }
-                logger.info("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: ${servers}")
-                return servers
-            } else {
-                def serverBusy = serverService.serverBooking(cnt)
-                if (!serverBusy) {
-                    logger.info("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: ${cnt}")
-                    return cnt.split(",")
-                }
-                logger.error("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.BAD_REQUEST}; message: Сервера забронированы(b) / не найдены(nf): ${serverBusy}")
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST}; message: Сервера забронированы(b) / не найдены(nf): ${serverBusy}")
+        if (cnt.isInteger()) {
+            def servers = serverService.serverBookingCnt(cnt)
+            if (servers[0] == false) {
+                logger.error("${request.method} ${request.requestURI}; message: Нужное количество свободных серверов не найдено - ${servers[1]}. Доступно: ${servers[2]}")
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST}; message: Нужное количество свободных серверов не найдено - ${servers[1]}. Доступно: ${servers[2]}")
             }
-        } catch (ex) {
-            logger.error("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.INTERNAL_SERVER_ERROR}; message: ${ex.getMessage()}; stackTrace: ${ex.getStackTrace()}")
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("${HttpStatus.INTERNAL_SERVER_ERROR }; message: Непредвиденная ошибка")
+            logger.info("${request.method} ${request.requestURI}; message: ${servers}")
+            return servers
+        } else {
+            def serverBusy = serverService.serverBooking(cnt)
+            if (!serverBusy) {
+                logger.info("${request.method} ${request.requestURI}; message: ${cnt}")
+                return cnt.split(",")
+            }
+            logger.error("${request.method} ${request.requestURI}; message: Сервера забронированы(b) / не найдены(nf): ${serverBusy}")
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST}; message: Сервера забронированы(b) / не найдены(nf): ${serverBusy}")
         }
     }
 
     // Автоматическое бронирование нужного кол-ва серверов на основе профилей
     @PostMapping("/serverBookingAuto")
     def postServerBookingAuto(@RequestParam("profiles") String profiles, HttpServletRequest request) {
-        try {
-            def servers = serverService.serverBookingAuto(profiles)
-            if (servers instanceof Boolean) {
-                logger.error("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.BAD_REQUEST}; message: Нужное количество свободных серверов не найдено - ${servers[0]}. Доступно: ${servers[1]}")
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST}; message: Нужное количество свободных серверов не найдено - ${servers[0]}. Доступно: ${servers[1]}")
-            }
-            if (servers instanceof Exception) {
-                logger.error("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.BAD_REQUEST}; message: Некорректный запрос; stackTrace: ${servers.getStackTrace()}")
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST }; message: Некорректный запрос")
-            }
-            logger.info("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: ${servers}")
-            return servers
-        } catch (ex) {
-            logger.error("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.INTERNAL_SERVER_ERROR}; message: ${ex.getMessage()}; stackTrace: ${ex.getStackTrace()}")
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("${HttpStatus.INTERNAL_SERVER_ERROR }; message: Непредвиденная ошибка")
+        def servers = serverService.serverBookingAuto(profiles)
+        if (servers instanceof Exception) {
+            throw new BadRequestException(
+                    "Неверный запрос. Get-параметр profiles указан неверно. Паттерн: {name} или {name}:{throughput}:{threads}:{rampUp}")
         }
+        if (servers[0] == false) {
+            logger.error("${request.method} ${request.requestURI}; message: Нужное количество свободных серверов не найдено - ${servers[1]}. Доступно: ${servers[2]}")
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST}; message: Нужное количество свободных серверов не найдено - ${servers[1]}. Доступно: ${servers[2]}")
+        }
+        logger.info("${request.method} ${request.requestURI}; message: ${servers}")
+        return servers
     }
 
     // Отмена бронирования N серверов
     @PostMapping("/serverBooking/cancel")
     def postServerBookingCancel(@RequestParam("server") String serverStr, HttpServletRequest request) {
-        try {
-            List<String> serverArr = serverStr.split(",")
-            for (serverName in serverArr) {
-                try {
-                    serverRepository.findById(serverName).get()
-                } catch (ex) {
-                    logger.error("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.BAD_REQUEST}; message: Сервер ${serverName} не найден")
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("${HttpStatus.BAD_REQUEST}; message: Сервер ${serverName} не найден")
-                }
-            }
-            serverService.serverBookingCancel(serverArr)
-            logger.info("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: операция выполнена для ${serverArr}")
-            return ResponseEntity.status(HttpStatus.OK).body("message: операция выполнена для ${serverArr}")
-        } catch (ex) {
-            logger.error("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.INTERNAL_SERVER_ERROR}; message: ${ex.getMessage()}; stackTrace: ${ex.getStackTrace()}")
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("${HttpStatus.INTERNAL_SERVER_ERROR }; message: Непредвиденная ошибка")
+        List<String> serverArr = serverStr.split(",")
+        for (serverName in serverArr) {
+            if (!serverRepository.findById(serverName))
+                throw new NotFoundException("Сервер не найден - ${serverName}")
         }
+        serverService.serverBookingCancel(serverArr)
+        logger.info("${request.method} ${request.requestURI}; message: Операция выполнена для: ${serverArr}")
+        return ResponseEntity.status(HttpStatus.OK).body("message: Операция выполнена для: ${serverArr}")
     }
 
     // Отмена бронирования всех серверов
     @PostMapping("/serverBooking/cancel/all")
     def postServerBookingCancelAll(HttpServletRequest request) {
-        try {
-            Integer serversCnt = serverService.serverBookingCancelAll()
-            logger.info("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Операция выполнена для всех забронированных серверов, кол-во: ${serversCnt}")
-            return ResponseEntity.status(HttpStatus.OK).body("message: Операция выполнена для всех забронированных серверов, кол-во: ${serversCnt}")
-        } catch (ex) {
-            logger.error("path: ${request.getRequestURI()}; statusCode: ${HttpStatus.INTERNAL_SERVER_ERROR}; message: ${ex.getMessage()}; stackTrace: ${ex.getStackTrace()}")
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("${HttpStatus.INTERNAL_SERVER_ERROR }; message: Непредвиденная ошибка")
-        }
+        Integer serversCnt = serverService.serverBookingCancelAll()
+        logger.info("${request.method} ${request.requestURI}; message: Операция выполнена для всех забронированных серверов, кол-во: ${serversCnt}")
+        return ResponseEntity.status(HttpStatus.OK).body("message: Операция выполнена для всех забронированных серверов, кол-во: ${serversCnt}")
     }
 
     // Удалить сервер
     @DeleteMapping("/{name}")
-    @ResponseStatus(value = HttpStatus.NO_CONTENT)
     def deleteServer(@PathVariable("name") String name, HttpServletRequest request) {
-        if (serverRepository.findById(name)) {
-            logger.info("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.OK}; message: Сервер удален - ${name}")
-            serverRepository.deleteById(name)
-            return ResponseEntity.noContent().build()
-        } else {
-            logger.error("method: ${request.method}; path: ${request.getRequestURI()}; statusCode: ${HttpStatus.NOT_FOUND}; message: Сервер не найден - ${name}")
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("${HttpStatus.NOT_FOUND }; message: Сервер не найден - ${name}")
-        }
+        if (!serverRepository.findById(name))
+            throw new NotFoundException("Сервер не найден - ${name}")
+        serverRepository.deleteById(name)
+        logger.info("${request.method} ${request.requestURI}; message: Сервер удален - ${name}")
+        return ResponseEntity.noContent().build()
     }
 }

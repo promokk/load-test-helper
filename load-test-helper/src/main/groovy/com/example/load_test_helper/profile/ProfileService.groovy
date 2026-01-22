@@ -10,6 +10,17 @@ class ProfileService {
         this.profileRepository = profileRepository
     }
 
+    // Добавить профиль
+    def addProfile(ProfileDTO profileDto) {
+        Profile profile = new Profile(
+                name: profileDto.name,
+                throughput: profileDto.throughput,
+                threads: profileDto.threads,
+                rampUp: profileDto.rampUp
+        )
+        profileRepository.save(profile)
+    }
+
     // Расчет профиля в зависимости от количества серверов
     def profileCalculation(String profiles, Integer serverCount = 1) {
         try {
@@ -28,6 +39,8 @@ class ProfileService {
                 } else {
                     params[1] = (params[1].toDouble() / serverCount).round(5)
                     params[2] = Math.ceil(params[2].toDouble() / serverCount).toInteger()
+                    // Проверка что передан rampUp
+                    params[3] = params[3]
                     profilesArr[i] = params
                 }
             }

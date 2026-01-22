@@ -30,16 +30,16 @@ class BackgroundTask {
             if (tests) {
                 for (test in tests) {
                     if (testService.deleteTest(test.id)) {
-                        logger.info("scheduling: taskCheckTest; status: OK; message: Тест ${test.id} завершен и удален")
+                        logger.info("Scheduling: taskCheckTest; status: OK; message: Тест ${test.id} завершен и удален")
                     } else {
-                        logger.error("scheduling: taskCheckTest; status: ERROR; message: Тест не найден - ${test.id}")
+                        logger.error("Scheduling: taskCheckTest; status: ERROR; message: Тест не найден - ${test.id}")
                     }
                 }
             } else {
-                logger.debug("scheduling: taskCheckTest; status: OK; message: Завершенные тесты отсутствуют")
+                logger.debug("Scheduling: taskCheckTest; status: OK; message: Завершенные тесты отсутствуют")
             }
         } catch (ex) {
-            logger.error("scheduling: taskCheckTest; status: ERROR;  message: Задача завершена с ошибкой; stackTrace: ${ex.getStackTrace()}")
+            logger.error("Scheduling: taskCheckTest; status: ERROR;  message: Задача завершена с ошибкой; stackTrace: ${ex.getStackTrace()}")
         }
     }
 }
