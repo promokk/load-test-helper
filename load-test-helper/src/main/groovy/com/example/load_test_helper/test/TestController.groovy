@@ -1,6 +1,5 @@
 package com.example.load_test_helper.test
 
-import com.example.load_test_helper.exception.BadRequestException
 import com.example.load_test_helper.exception.NotFoundException
 import com.example.load_test_helper.server.ServerService
 import jakarta.servlet.http.HttpServletRequest
@@ -16,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-@RestController
 @Validated
+@RestController
 @RequestMapping("/test")
 class TestController {
     def logger = LoggerFactory.getLogger(getClass())
@@ -39,7 +38,7 @@ class TestController {
 
     // Поиск теста по id
     @GetMapping("/info/{id}")
-    def getTestById(@PathVariable("id") Integer id, HttpServletRequest request) {
+    def getTestById(@PathVariable("id") Integer id) {
         if (!testRepository.findById(id))
             throw new NotFoundException("Тест не найден - ${id}")
         return testRepository.findById(id)
@@ -48,8 +47,6 @@ class TestController {
     // Создать тест
     @PostMapping("/create")
     def postCreateTest(@Valid @RequestBody TestDTO test, HttpServletRequest request) {
-        if (!test.validateServer())
-            throw new BadRequestException("Неверное тело запроса. Поле server != List<String>")
         Test newTest = testService.createTest(test)
         logger.info("${request.method} ${request.requestURI}; message: Тест создан - ${newTest.id}")
         return newTest.id

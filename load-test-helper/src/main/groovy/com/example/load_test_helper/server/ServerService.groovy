@@ -1,5 +1,6 @@
 package com.example.load_test_helper.server
 
+import com.example.load_test_helper.profile.Profile
 import com.example.load_test_helper.profile.ProfileService
 import org.springframework.stereotype.Service
 
@@ -11,6 +12,15 @@ class ServerService {
     ServerService(ServerRepository serverRepository, ProfileService profileService) {
         this.serverRepository = serverRepository
         this.profileService = profileService
+    }
+
+    // Добавить сервер
+    def addProfile(ServerDTO serverDto) {
+        Server server = new Server(
+                name: serverDto.name,
+                free: serverDto.free
+        )
+        serverRepository.save(server)
     }
 
     // Бронирование N серверов
@@ -26,7 +36,7 @@ class ServerService {
             }
             return serverArr
         } catch (ex) {
-            return [ex, cnt, servers.size()]
+            return [false, cnt, servers.size()]
         }
     }
 
@@ -35,7 +45,7 @@ class ServerService {
         def threadMax = 0
         def profilesArr = profileService.profileCalculation(profiles)
         if (profilesArr instanceof Exception) {
-            return false
+            return profilesArr
         }
         for (profile in profilesArr) {
             def threadCount = profile[2].toInteger()

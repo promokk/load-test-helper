@@ -12,8 +12,4 @@ class TestDTO {
     List<String> server
     @NotBlank
     String profile
-
-    def validateServer() {
-        server instanceof List && server?.every { it instanceof String }
-    }
 }

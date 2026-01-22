@@ -2,12 +2,12 @@ package com.example.load_test_helper.test
 
 import com.example.load_test_helper.profile.ProfileService
 import com.example.load_test_helper.server.ServerService
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
 class TestService {
+    def logger = LoggerFactory.getLogger(getClass())
     private final TestRepository testRepository
     private final ProfileService profileService
     private final ServerService serverService
@@ -43,6 +43,7 @@ class TestService {
             testRepository.deleteById(id)
             return true
         } catch (Exception ex) {
+            logger.error("TestService: deleteTest; status: ERROR; message: Ошибка ${ex.getStackTrace()}")
             return false
         }
     }

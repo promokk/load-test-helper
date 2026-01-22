@@ -1,11 +1,12 @@
 package com.example.load_test_helper.scenario
 
-import com.example.load_test_helper.exception.BadRequestException
 import com.example.load_test_helper.exception.NotFoundException
 import jakarta.servlet.http.HttpServletRequest
+import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
+@Validated
 @RestController
 @RequestMapping("/scenario")
 class ScenarioController {
@@ -34,7 +36,7 @@ class ScenarioController {
 
     // Поиск сценария по name
     @GetMapping("/{name}")
-    def getTestById(@PathVariable("name") String name, HttpServletRequest request) {
+    def getTestById(@PathVariable("name") String name) {
         if (!scenarioRepository.findById(name))
             throw new NotFoundException("Сценарий не найден - ${name}")
         return scenarioRepository.findById(name)
@@ -42,14 +44,10 @@ class ScenarioController {
 
     // Добавить сценарий
     @PostMapping("/add")
-    def addScenario(@RequestBody Scenario scenario, HttpServletRequest request) {
-        if (scenario.name == null || scenario.stand == null || scenario.draft == null || scenario.group == null)
-            throw new BadRequestException("Неверное тело запроса. Обязательные поля: name, stand, draft, group")
-        if (scenario.group.any{it.profile == null || it.server == null || it.url == null})
-            throw new BadRequestException("Неверное тело запроса. Обязательные поля group: profile, server, url")
-        Scenario newScenario = scenarioRepository.save(scenario)
+    def addScenario(@Valid @RequestBody ScenarioDTO scenarioDto, HttpServletRequest request) {
+        Scenario scenario = scenarioService.addScenario(scenarioDto)
         logger.info("${request.method} ${request.requestURI}; message: Сценарий добавлен - ${scenario.name}")
-        return newScenario
+        return scenario
     }
 
     // Удалить сценарий
