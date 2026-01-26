@@ -1,4 +1,4 @@
-package com.example.load_test_helper
+package com.example.load_test_helper.components
 
 import com.example.load_test_helper.profile.Profile
 import com.example.load_test_helper.profile.ProfileRepository
@@ -33,7 +33,7 @@ class DataLoader {
     }
 
     @PostConstruct
-    private void dataLoader() {
+    private void dataLoaderServer() {
         if (!serverRepository.count()) {
             String[] serverArr = new File("${serverListFile}").text.split("\n")
             serverRepository.deleteAll()
@@ -44,7 +44,10 @@ class DataLoader {
         } else {
             logger.info("DataLoader - serverRepository --> Наполнение БД не выполнено. БД преднаполнена")
         }
+    }
 
+    @PostConstruct
+    private void dataLoaderProfile() {
         if (!profileRepository.count()) {
             String[] profileArr = new File("${profileListFile}").text.split("\n")
             profileRepository.deleteAll()
