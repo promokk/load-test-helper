@@ -1,4 +1,4 @@
-package com.example.load_test_helper
+package com.example.load_test_helper.components
 
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component

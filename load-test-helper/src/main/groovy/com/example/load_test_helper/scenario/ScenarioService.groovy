@@ -16,6 +16,8 @@ class ScenarioService {
         def scenario = new Scenario(
                 name: scenarioDto.name,
                 stand: scenarioDto.stand,
+                url: scenarioDto.url,
+                duration: scenarioDto.duration,
                 draft: scenarioDto.draft
         )
         scenarioDto.group.each { groupDto ->
@@ -23,7 +25,8 @@ class ScenarioService {
                     scenario: scenario,
                     profile: groupDto.profile,
                     server: groupDto.server,
-                    url: groupDto.url
+                    url: groupDto.url ?: null,
+                    duration: groupDto.duration ?: null
             )
             scenario.group.add(group)
         }
