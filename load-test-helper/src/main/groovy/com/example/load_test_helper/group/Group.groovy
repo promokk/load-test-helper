@@ -32,14 +32,18 @@ class Group {
     @Column(name="server", nullable=false)
     String server
 
-    @Column(name="url", nullable=false)
+    @Column(name="url")
     String url
+
+    @Column(name="duration")
+    Integer duration
 
     Group() {}
 
-    Group(String profile, String server, String url) {
+    Group(String profile, String server, String url, Integer duration) {
         this.profile = profile
         this.server = server
         this.url = url
+        this.duration = duration
     }
 }

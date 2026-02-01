@@ -11,6 +11,11 @@ class ScenarioDTO {
     String name
     @NotBlank
     String stand
+    @NotBlank
+    String url
+    @NotNull
+    @Min(1)
+    Integer duration
     @NotNull
     Boolean draft
     @Valid
