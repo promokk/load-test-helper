@@ -18,9 +18,10 @@ class ScenarioService {
                 stand: scenarioDto.stand,
                 url: scenarioDto.url,
                 duration: scenarioDto.duration,
+                customParam: scenarioDto.customParam ?: null,
                 draft: scenarioDto.draft
         )
-        scenarioDto.group.each { groupDto ->
+        scenarioDto.groups.each { groupDto ->
             def group = new Group(
                     scenario: scenario,
                     profile: groupDto.profile,
@@ -28,7 +29,7 @@ class ScenarioService {
                     url: groupDto.url ?: null,
                     duration: groupDto.duration ?: null
             )
-            scenario.group.add(group)
+            scenario.groups.add(group)
         }
         return scenarioRepository.save(scenario)
     }

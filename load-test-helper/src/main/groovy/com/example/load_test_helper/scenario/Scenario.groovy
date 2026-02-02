@@ -14,7 +14,7 @@ import com.example.load_test_helper.group.Group
 
 
 @Entity
-@JsonPropertyOrder(["name", "stand", "url", "duration", "draft", "group"])
+@JsonPropertyOrder(["name", "stand", "url", "duration", "customParam", "draft", "groups"])
 @Table(name="scenario", schema="load_test_helper")
 class Scenario {
     @Id
@@ -30,28 +30,33 @@ class Scenario {
     @Column(name="duration", nullable=false)
     Integer duration
 
+    @Column(name="customParam")
+    String customParam
+
     @Column(name="draft", nullable=false)
     Boolean draft
 
     @OneToMany(mappedBy = "scenario", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Column(name="group")
-    List<Group> group = []
+    @Column(name="groups")
+    List<Group> groups = []
 
     Scenario() {}
 
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     Scenario(@JsonProperty("name") String name,
-            @JsonProperty("stand") String stand,
-            @JsonProperty("stand") String url,
-            @JsonProperty("stand") String duration,
-            @JsonProperty("draft") Boolean draft,
-            @JsonProperty("group") List<Group> group) {
+             @JsonProperty("stand") String stand,
+             @JsonProperty("stand") String url,
+             @JsonProperty("duration") Integer duration,
+             @JsonProperty("duration") String customParam,
+             @JsonProperty("draft") Boolean draft,
+             @JsonProperty("groups") List<Group> groups) {
         this.name = name
         this.stand = stand
-        this.stand = url
-        this.stand = duration
+        this.url = url
+        this.duration = duration
+        this.customParam = customParam
         this.draft = draft
-        this.group = group
-        this.group.forEach { it.scenario = this }
+        this.groups = groups
+        this.groups.forEach { it.scenario = this }
     }
 }

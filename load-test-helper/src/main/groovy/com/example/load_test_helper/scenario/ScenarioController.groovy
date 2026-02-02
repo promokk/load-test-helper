@@ -36,7 +36,7 @@ class ScenarioController {
 
     // Поиск сценария по name
     @GetMapping("/{name}")
-    def getTestById(@PathVariable("name") String name) {
+    def getScenarioById(@PathVariable("name") String name) {
         if (!scenarioRepository.findById(name))
             throw new NotFoundException("Сценарий не найден - ${name}")
         return scenarioRepository.findById(name)

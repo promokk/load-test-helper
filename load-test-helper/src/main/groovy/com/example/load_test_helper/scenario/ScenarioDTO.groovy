@@ -16,9 +16,10 @@ class ScenarioDTO {
     @NotNull
     @Min(1)
     Integer duration
+    String customParam
     @NotNull
     Boolean draft
     @Valid
     @NotEmpty
-    List<GroupDTO> group = []
+    List<GroupDTO> groups = []
 }
