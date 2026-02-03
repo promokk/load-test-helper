@@ -36,9 +36,10 @@ class ServerController {
     // Поиск сервера по name
     @GetMapping("/{name}")
     def getServerById(@PathVariable("name") String name) {
-        if (!serverRepository.findById(name))
+        def server = serverRepository.findById(name) ?: false
+        if (!server)
             throw new NotFoundException("Сервер не найден - ${name}")
-        return serverRepository.findById(name)
+        return server
     }
 
     // Список свободных серверов

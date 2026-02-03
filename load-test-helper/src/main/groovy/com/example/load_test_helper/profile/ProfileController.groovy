@@ -38,9 +38,10 @@ class ProfileController {
     // Поиск профиля по name
     @GetMapping("/{name}")
     def getProfileById(@PathVariable("name") String name, HttpServletRequest request) {
-        if (!profileRepository.findById(name))
+        def profile = profileRepository.findById(name) ?: false
+        if (!profile)
             throw new NotFoundException("Профиль не найден - ${name}", request.method, request.requestURI)
-        return profileRepository.findById(name)
+        return profile
     }
 
     // Расчет профиля в зависимости от количества серверов
