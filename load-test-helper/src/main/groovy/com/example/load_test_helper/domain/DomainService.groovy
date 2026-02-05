@@ -28,9 +28,9 @@ class DomainService {
         return domainRepository.save(domain)
     }
 
-    // Добавить стенд в домен
-    def addStandToDomain(StandDTO standDTO, Domain domain) {
-        def stand = domain.stands.find {it.name == standDTO.name}
+    // Добавить / Редактировать стенд
+    def addStand(StandDTO standDTO, Domain domain) {
+        def stand = domainRepository.findStandByDomainNameAndStandName(domain.name, standDTO.name) ?: null
         if (stand) {
             stand.name = standDTO.name
             stand.url = standDTO.url

@@ -1,14 +1,18 @@
 package com.example.load_test_helper.scenario
 
 import com.example.load_test_helper.group.Group
+import com.example.load_test_helper.group.GroupDTO
+import com.example.load_test_helper.group.GroupRepository
 import org.springframework.stereotype.Service
 
 @Service
 class ScenarioService {
     private final ScenarioRepository scenarioRepository
+    private final GroupRepository groupRepository
 
-    ScenarioService(ScenarioRepository scenarioRepository) {
+    ScenarioService(ScenarioRepository scenarioRepository, GroupRepository groupRepository) {
         this.scenarioRepository = scenarioRepository
+        this.groupRepository = groupRepository
     }
 
     // Добавить сценарий
@@ -34,14 +38,25 @@ class ScenarioService {
         return scenarioRepository.save(scenario)
     }
 
-    // Удалить все черновые сценарии
-    def deleteDraftAll() {
-        Iterable<Scenario> scenarios = scenarioRepository.findByDraft(true)
-        def scenarioDelArr = []
-        for (scenario in scenarios) {
-            scenarioRepository.deleteById(scenario.name)
-            scenarioDelArr.add(scenario.name)
-        }
-        return scenarioDelArr
+    // Добавить группу
+    def addGroup(GroupDTO groupDTO, Scenario scenario) {
+        Group group = new Group(
+                scenario: scenario,
+                profile: groupDTO.profile,
+                server: groupDTO.server,
+                url: groupDTO.url,
+                duration: groupDTO.duration
+        )
+        scenario.groups.add(group)
+        return scenarioRepository.save(scenario)
+    }
+
+    // Редактировать группу
+    def editGroup(GroupDTO groupDTO ,Group group) {
+        group.profile = groupDTO.profile
+        group.server = groupDTO.server
+        group.url = groupDTO.url
+        group.duration = groupDTO.duration
+        return groupRepository.save(group)
     }
 }

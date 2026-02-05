@@ -26,7 +26,7 @@ class RestLoggingFilter extends OncePerRequestFilter {
             log.info("Response -- {} {}; status: {}",
                     request.method, request.requestURI, response.status)
         } catch (Throwable t) {
-            log.error("{} {}; Ошибка при обработке запроса:",
+            log.error("{} {}; Ошибка при обработке запроса: {}",
                     request.method, request.requestURI, t)
         }
     }

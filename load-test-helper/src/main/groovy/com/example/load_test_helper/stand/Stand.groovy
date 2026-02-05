@@ -16,6 +16,7 @@ import jakarta.persistence.Table
 @Table(name="stand", schema="load_test_helper")
 class Stand {
     @Id
+    @JsonIgnore
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name="id",nullable=false)
     Integer id

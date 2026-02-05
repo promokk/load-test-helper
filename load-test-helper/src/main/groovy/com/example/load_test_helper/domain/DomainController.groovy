@@ -1,7 +1,9 @@
 package com.example.load_test_helper.domain
 
 import com.example.load_test_helper.exception.NotFoundException
+import com.example.load_test_helper.stand.Stand
 import com.example.load_test_helper.stand.StandDTO
+import com.example.load_test_helper.stand.StandRepository
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
@@ -22,10 +24,12 @@ import org.springframework.web.bind.annotation.RestController
 class DomainController {
     def logger = LoggerFactory.getLogger(getClass())
     private final DomainRepository domainRepository
+    private final StandRepository standRepository
     private final DomainService domainService
 
-    DomainController(DomainRepository domainRepository, DomainService domainService) {
+    DomainController(DomainRepository domainRepository, StandRepository standRepository, DomainService domainService) {
         this.domainRepository = domainRepository
+        this.standRepository = standRepository
         this.domainService = domainService
     }
 
@@ -47,10 +51,10 @@ class DomainController {
     // Поиск url (domain full) по domainName и standName
     @GetMapping("/full")
     def getUrlByDomainAndStand(@RequestParam("domainName") String domainName, @RequestParam("standName") String standName) {
-        def domainFull = domainRepository.findByDomainAndStand(domainName, standName) ?: false
-        if (!domainFull)
+        Optional<Stand> stand = domainRepository.findStandByDomainNameAndStandName(domainName, standName) ?: null
+        if (!stand)
             throw new NotFoundException("Полное имя домена ${domainName} для стенда ${standName} не найдено")
-        return domainFull
+        return stand.get().url
     }
 
     // Добавить домен
@@ -61,13 +65,13 @@ class DomainController {
         return domain
     }
 
-    // Добавить стенд в домен
+    // Добавить / Редактировать стенд
     @PostMapping("/{name}/add/stand")
-    def addStandToDomain(@Valid @RequestBody StandDTO standDTO, @PathVariable("name") String name, HttpServletRequest request) {
-        def domain = domainRepository.findById(name) ?: false
+    def addStand(@Valid @RequestBody StandDTO standDTO, @PathVariable("name") String name, HttpServletRequest request) {
+        def domain = domainRepository.findById(name) ?: null
         if (!domain)
             throw new NotFoundException("Домен не найден - ${name}")
-        domain = domainService.addStandToDomain(standDTO, domain.get())
+        domain = domainService.addStand(standDTO, domain.get())
         logger.info("${request.method} ${request.requestURI}; message: Стенд ${standDTO.name} добавлен в ${domain.name}")
         return domain
     }
@@ -79,6 +83,17 @@ class DomainController {
             throw new NotFoundException("Домен не найден - ${name}")
         domainRepository.deleteById(name)
         logger.info("${request.method} ${request.requestURI}; message: Домен удален - ${name}")
+        return ResponseEntity.noContent().build()
+    }
+
+    // Удалить стенд
+    @DeleteMapping("/{name}/stand/{standName}")
+    def deleteStand(@PathVariable("name") String domainName, @PathVariable("standName") String standName, HttpServletRequest request) {
+        Optional<Stand> stand = domainRepository.findStandByDomainNameAndStandName(domainName, standName) ?: null
+        if (!stand)
+            throw new NotFoundException("Стенда ${standName} для домена ${domainName} не найден")
+        standRepository.deleteById(stand.get().id)
+        logger.info("${request.method} ${request.requestURI}; message: Стенд удален - ${standName}")
         return ResponseEntity.noContent().build()
     }
 }
