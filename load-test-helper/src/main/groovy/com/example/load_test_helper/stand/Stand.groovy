@@ -2,6 +2,7 @@ package com.example.load_test_helper.stand
 
 import com.example.load_test_helper.domain.Domain
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonPropertyOrder
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
@@ -12,7 +13,9 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 
+
 @Entity
+@JsonPropertyOrder(["domain", "name", "url"])
 @Table(name="stand", schema="load_test_helper")
 class Stand {
     @Id

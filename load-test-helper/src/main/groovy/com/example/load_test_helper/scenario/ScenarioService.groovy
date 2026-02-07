@@ -20,9 +20,8 @@ class ScenarioService {
         def scenario = new Scenario(
                 name: scenarioDto.name,
                 stand: scenarioDto.stand,
-                url: scenarioDto.url,
+                domain: scenarioDto.domain,
                 duration: scenarioDto.duration,
-                customParam: scenarioDto.customParam ?: null,
                 draft: scenarioDto.draft
         )
         scenarioDto.groups.each { groupDto ->
@@ -30,8 +29,9 @@ class ScenarioService {
                     scenario: scenario,
                     profile: groupDto.profile,
                     server: groupDto.server,
-                    url: groupDto.url ?: null,
-                    duration: groupDto.duration ?: null
+                    domain: groupDto.domain ?: null,
+                    duration: groupDto.duration ?: null,
+                    customParam: groupDto.customParam ?: null,
             )
             scenario.groups.add(group)
         }
@@ -44,8 +44,9 @@ class ScenarioService {
                 scenario: scenario,
                 profile: groupDTO.profile,
                 server: groupDTO.server,
-                url: groupDTO.url,
-                duration: groupDTO.duration
+                domain: groupDTO.domain,
+                duration: groupDTO.duration,
+                customParam: groupDTO.customParam ?: null,
         )
         scenario.groups.add(group)
         return scenarioRepository.save(scenario)
@@ -55,8 +56,9 @@ class ScenarioService {
     def editGroup(GroupDTO groupDTO ,Group group) {
         group.profile = groupDTO.profile
         group.server = groupDTO.server
-        group.url = groupDTO.url
+        group.domain = groupDTO.domain
         group.duration = groupDTO.duration
+        group.customParam = groupDTO.customParam
         return groupRepository.save(group)
     }
 }

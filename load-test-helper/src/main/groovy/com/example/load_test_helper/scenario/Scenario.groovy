@@ -9,12 +9,11 @@ import jakarta.persistence.Id
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import jakarta.persistence.CascadeType
-
 import com.example.load_test_helper.group.Group
 
 
 @Entity
-@JsonPropertyOrder(["name", "stand", "url", "duration", "customParam", "draft", "groups"])
+@JsonPropertyOrder(["name", "stand", "domain", "duration", "draft", "groups"])
 @Table(name="scenario", schema="load_test_helper")
 class Scenario {
     @Id
@@ -24,14 +23,11 @@ class Scenario {
     @Column(name="stand", nullable=false)
     String stand
 
-    @Column(name="url", nullable=false)
-    String url
+    @Column(name="domain", nullable=false)
+    String domain
 
     @Column(name="duration", nullable=false)
     Integer duration
-
-    @Column(name="customParam")
-    String customParam
 
     @Column(name="draft", nullable=false)
     Boolean draft
@@ -45,16 +41,14 @@ class Scenario {
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     Scenario(@JsonProperty("name") String name,
              @JsonProperty("stand") String stand,
-             @JsonProperty("stand") String url,
+             @JsonProperty("domain") String domain,
              @JsonProperty("duration") Integer duration,
-             @JsonProperty("duration") String customParam,
              @JsonProperty("draft") Boolean draft,
              @JsonProperty("groups") List<Group> groups) {
         this.name = name
         this.stand = stand
-        this.url = url
+        this.domain = domain
         this.duration = duration
-        this.customParam = customParam
         this.draft = draft
         this.groups = groups
         this.groups.forEach { it.scenario = this }

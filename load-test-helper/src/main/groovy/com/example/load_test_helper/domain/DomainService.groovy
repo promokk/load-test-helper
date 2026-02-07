@@ -2,10 +2,12 @@ package com.example.load_test_helper.domain
 
 import com.example.load_test_helper.stand.Stand
 import com.example.load_test_helper.stand.StandDTO
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
 class DomainService {
+    def logger = LoggerFactory.getLogger(getClass())
     private final DomainRepository domainRepository
 
     DomainService(DomainRepository domainRepository) {
@@ -17,7 +19,13 @@ class DomainService {
         def domain = new Domain(
                 name: domainDTO.name
         )
-        domainDTO.stands.each { standDTO ->
+        for (standDTO in domainDTO.stands)  {
+            def existingStand = domain.stands.find {it.name == standDTO.name}
+            if (existingStand) {
+                logger.warn(
+                        "DomainService: addDomain; status: WARN; message: Стенд ${standDTO.name} существует в ${domain.name}")
+                continue
+            }
             def stand = new Stand(
                     domain: domain,
                     name: standDTO.name,
@@ -32,7 +40,7 @@ class DomainService {
     def addStand(StandDTO standDTO, Domain domain) {
         def stand = domainRepository.findStandByDomainNameAndStandName(domain.name, standDTO.name) ?: null
         if (stand) {
-            stand.name = standDTO.name
+            stand = stand.get()
             stand.url = standDTO.url
             return domainRepository.save(domain)
         }

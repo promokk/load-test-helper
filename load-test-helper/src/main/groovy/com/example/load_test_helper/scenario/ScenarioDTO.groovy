@@ -12,11 +12,10 @@ class ScenarioDTO {
     @NotBlank
     String stand
     @NotBlank
-    String url
+    String domain
     @NotNull
     @Min(1)
     Integer duration
-    String customParam
     @NotNull
     Boolean draft
     @Valid
