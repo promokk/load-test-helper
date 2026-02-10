@@ -7,7 +7,8 @@ class GroupDTO {
     String profile
     @NotBlank
     String server
-    String url
+    String domain
     @Min(1)
     Integer duration
+    String customParam
 }

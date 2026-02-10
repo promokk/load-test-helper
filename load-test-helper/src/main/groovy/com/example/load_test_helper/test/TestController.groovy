@@ -39,9 +39,10 @@ class TestController {
     // Поиск теста по id
     @GetMapping("/info/{id}")
     def getTestById(@PathVariable("id") Integer id) {
-        if (!testRepository.findById(id))
+        def test = testRepository.findById(id) ?: false
+        if (!test)
             throw new NotFoundException("Тест не найден - ${id}")
-        return testRepository.findById(id)
+        return test
     }
 
     // Создать тест

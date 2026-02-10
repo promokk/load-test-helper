@@ -1,11 +1,13 @@
 package com.example.load_test_helper.server
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.Table
 
 @Entity
+@JsonPropertyOrder(["name", "free"])
 @Table(name="server", schema="load_test_helper")
 class Server {
     @Id

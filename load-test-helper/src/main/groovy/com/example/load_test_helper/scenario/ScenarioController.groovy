@@ -1,6 +1,10 @@
 package com.example.load_test_helper.scenario
 
+import com.example.load_test_helper.exception.BadRequestException
 import com.example.load_test_helper.exception.NotFoundException
+import com.example.load_test_helper.group.Group
+import com.example.load_test_helper.group.GroupDTO
+import com.example.load_test_helper.group.GroupRepository
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
@@ -11,6 +15,7 @@ import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -21,10 +26,12 @@ import org.springframework.web.bind.annotation.RestController
 class ScenarioController {
     def logger = LoggerFactory.getLogger(getClass())
     private final ScenarioRepository scenarioRepository
+    private final GroupRepository groupRepository
     private final ScenarioService scenarioService
 
-    ScenarioController(ScenarioRepository scenarioRepository, ScenarioService scenarioService) {
+    ScenarioController(ScenarioRepository scenarioRepository, ScenarioService scenarioService, GroupRepository groupRepository) {
         this.scenarioRepository = scenarioRepository
+        this.groupRepository = groupRepository
         this.scenarioService = scenarioService
     }
 
@@ -36,10 +43,11 @@ class ScenarioController {
 
     // Поиск сценария по name
     @GetMapping("/{name}")
-    def getTestById(@PathVariable("name") String name) {
-        if (!scenarioRepository.findById(name))
+    def getScenarioById(@PathVariable("name") String name) {
+        def scenario = scenarioRepository.findById(name) ?: false
+        if (!scenario)
             throw new NotFoundException("Сценарий не найден - ${name}")
-        return scenarioRepository.findById(name)
+        return scenario
     }
 
     // Добавить сценарий
@@ -48,6 +56,32 @@ class ScenarioController {
         Scenario scenario = scenarioService.addScenario(scenarioDto)
         logger.info("${request.method} ${request.requestURI}; message: Сценарий добавлен - ${scenario.name}")
         return scenario
+    }
+
+    // Добавить группу
+    @PostMapping("/{name}/add/group")
+    def addGroup(@Valid @RequestBody GroupDTO groupDTO, @PathVariable("name") String name, HttpServletRequest request) {
+        def scenario = scenarioRepository.findById(name) ?: null
+        if (!scenario)
+            throw new NotFoundException("Сценарий не найден - ${name}")
+        scenario = scenarioService.addGroup(groupDTO, scenario.get())
+        logger.info("${request.method} ${request.requestURI}; message: Группа ${scenario.groups.last().id} добавлена в ${scenario.name}")
+        return scenario
+    }
+
+    // Редактировать группу
+    @PutMapping("/{name}/group/{groupId}")
+    def editGroup(@Valid @RequestBody GroupDTO groupDTO, @PathVariable("name") String name, @PathVariable("groupId") String groupId, HttpServletRequest request) {
+        if (!groupId.isInteger())
+            throw new BadRequestException("Неверный запрос. Path-параметр groupId != Integer")
+        if (!scenarioRepository.findById(name))
+            throw new NotFoundException("Сценарий не найден - ${name}")
+        def group = scenarioRepository.findGroupByScenarioNameAndGroupId(name, groupId.toInteger()) ?: null
+        if (!group)
+            throw new NotFoundException("Группа ${groupId} для сценария ${name} не найдена")
+        group = scenarioService.editGroup(groupDTO, group.get())
+        logger.info("${request.method} ${request.requestURI}; message: Группа ${groupId} отредактирована")
+        return group
     }
 
     // Удалить сценарий
@@ -63,8 +97,22 @@ class ScenarioController {
     // Удалить все черновые сценарии
     @DeleteMapping("/draft/deleteAll")
     def deleteDraftAll(HttpServletRequest request) {
-        List<String> scenarioDelArr = scenarioService.deleteDraftAll()
-        logger.info("${request.method} ${request.requestURI}; message: Удалено ${scenarioDelArr.size()}: ${scenarioDelArr}")
-        return ResponseEntity.status(HttpStatus.OK).body("message: Удалено ${scenarioDelArr.size()}: ${scenarioDelArr}")
+        Iterable<Scenario> scenarios = scenarioRepository.findByDraft(true)
+        scenarioRepository.deleteAll(scenarios)
+        logger.info("${request.method} ${request.requestURI}; message: Удалено ${scenarios.size()}: ${scenarios*.name}")
+        return ResponseEntity.status(HttpStatus.OK).body("message: Удалено ${scenarios.size()}: ${scenarios*.name}")
+    }
+
+    // Удалить группу
+    @DeleteMapping("/{name}/group/{groupId}")
+    def deleteGroup(@PathVariable("name") String name, @PathVariable("groupId") String groupId, HttpServletRequest request) {
+        if (!groupId.isInteger())
+            throw new BadRequestException("Неверный запрос. Path-параметр groupId != Integer")
+        Optional<Group> group = scenarioRepository.findGroupByScenarioNameAndGroupId(name, groupId.toInteger()) ?: null
+        if (!group)
+            throw new NotFoundException("Группа ${groupId} для сценария ${name} не найдена")
+        groupRepository.deleteById(group.get().id)
+        logger.info("${request.method} ${request.requestURI}; message: Группа удалена - ${groupId}")
+        return ResponseEntity.noContent().build()
     }
 }

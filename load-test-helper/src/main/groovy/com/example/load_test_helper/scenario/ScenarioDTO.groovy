@@ -12,7 +12,7 @@ class ScenarioDTO {
     @NotBlank
     String stand
     @NotBlank
-    String url
+    String domain
     @NotNull
     @Min(1)
     Integer duration
@@ -20,5 +20,5 @@ class ScenarioDTO {
     Boolean draft
     @Valid
     @NotEmpty
-    List<GroupDTO> group = []
+    List<GroupDTO> groups = []
 }
