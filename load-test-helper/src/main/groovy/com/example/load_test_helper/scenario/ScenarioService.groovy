@@ -19,7 +19,7 @@ class ScenarioService {
     def addScenario(ScenarioDTO scenarioDto) {
         def scenario = new Scenario(
                 name: scenarioDto.name,
-                stand: scenarioDto.stand,
+                stand: scenarioDto.stand ?: null,
                 domain: scenarioDto.domain,
                 duration: scenarioDto.duration,
                 draft: scenarioDto.draft

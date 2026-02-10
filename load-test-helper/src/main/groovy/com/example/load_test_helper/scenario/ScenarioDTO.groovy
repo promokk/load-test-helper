@@ -9,7 +9,6 @@ import org.springframework.validation.annotation.Validated
 class ScenarioDTO {
     @NotBlank
     String name
-    @NotBlank
     String stand
     @NotBlank
     String domain

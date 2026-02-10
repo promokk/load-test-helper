@@ -20,7 +20,7 @@ class Scenario {
     @Column(name="name", nullable=false)
     String name
 
-    @Column(name="stand", nullable=false)
+    @Column(name="stand")
     String stand
 
     @Column(name="domain", nullable=false)
