@@ -7,8 +7,11 @@ class GroupDTO {
     String profile
     @NotBlank
     String server
+    Boolean masterRun
     String domain
     @Min(1)
     Integer duration
-    String customParam
+    String certificate
+    String testParam
+    String serverParam
 }

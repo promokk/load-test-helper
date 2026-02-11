@@ -15,7 +15,7 @@ import jakarta.persistence.Table
 
 
 @Entity
-@JsonPropertyOrder(["id", "scenario", "profile", "server", "domain", "duration", "customParam"])
+@JsonPropertyOrder(["id", "scenario", "profile", "server", "masterRun", "domain", "duration", "certificate", "testParam", "serverParam"])
 @Table(name="group", schema="load_test_helper")
 class Group {
     @Id
@@ -34,22 +34,34 @@ class Group {
     @Column(name="server", nullable=false)
     String server
 
+    @Column(name="masterRun")
+    Boolean masterRun
+
     @Column(name="domain")
     String domain
 
     @Column(name="duration")
     Integer duration
 
-    @Column(name="customParam")
-    String customParam
+    @Column(name="certificate")
+    String certificate
+
+    @Column(name="testParam")
+    String testParam
+
+    @Column(name="serverParam")
+    String serverParam
 
     Group() {}
 
-    Group(String profile, String server, String domain, Integer duration, String customParam) {
+    Group(String profile, String server, Boolean masterRun, String domain, Integer duration, String certificate, String testParam, String serverParam) {
         this.profile = profile
         this.server = server
+        this.masterRun = masterRun
         this.domain = domain
         this.duration = duration
-        this.customParam = customParam
+        this.certificate = certificate
+        this.testParam = testParam
+        this.serverParam = serverParam
     }
 }
