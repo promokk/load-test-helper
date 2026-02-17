@@ -1,6 +1,9 @@
 package com.example.load_test_helper.test
 
-import jakarta.validation.constraints.*
+import jakarta.validation.constraints.Min
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotEmpty
+import jakarta.validation.constraints.NotNull
 
 class TestDTO {
     @NotBlank

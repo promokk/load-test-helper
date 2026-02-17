@@ -4,6 +4,8 @@ import com.example.load_test_helper.stand.Stand
 import com.example.load_test_helper.stand.StandDTO
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Isolation
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DomainService {
@@ -15,6 +17,7 @@ class DomainService {
     }
 
     // Добавить домен
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     def addDomain(DomainDTO domainDTO) {
         def domain = new Domain(
                 name: domainDTO.name
@@ -37,6 +40,7 @@ class DomainService {
     }
 
     // Добавить / Редактировать стенд
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     def addStand(StandDTO standDTO, Domain domain) {
         def stand = domainRepository.findStandByDomainNameAndStandName(domain.name, standDTO.name) ?: null
         if (stand) {

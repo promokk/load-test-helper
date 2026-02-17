@@ -4,6 +4,8 @@ import com.example.load_test_helper.group.Group
 import com.example.load_test_helper.group.GroupDTO
 import com.example.load_test_helper.group.GroupRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Isolation
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ScenarioService {
@@ -16,6 +18,7 @@ class ScenarioService {
     }
 
     // Добавить сценарий
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     def addScenario(ScenarioDTO scenarioDTO) {
         def scenario = new Scenario(
                 name: scenarioDTO.name,
@@ -42,6 +45,7 @@ class ScenarioService {
     }
 
     // Добавить группу
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     def addGroup(GroupDTO groupDTO, Scenario scenario) {
         Group group = new Group(
                 scenario: scenario,
@@ -58,6 +62,7 @@ class ScenarioService {
     }
 
     // Редактировать группу
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     def editGroup(GroupDTO groupDTO ,Group group) {
         group.profile = groupDTO.profile
         group.server = groupDTO.server

@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
 
 import java.time.LocalDateTime
@@ -22,7 +23,7 @@ class BackgroundTask {
         this.testService = testService
     }
 
-    @Transactional(timeout = 10)
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     @Scheduled(fixedRate = 60000)
     void taskCheckTest() {
         try {
