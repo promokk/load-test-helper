@@ -84,10 +84,14 @@ class ServerService {
     // Отмена бронирования N серверов
     @Transactional(isolation = Isolation.SERIALIZABLE)
     def serverBookingCancel(List<String> serverArr) {
-        for (serverName in serverArr) {
-            Server server = serverRepository.findById(serverName).get()
-            server.free = true
-            serverRepository.save(server)
+        try {
+            for (serverName in serverArr) {
+                Server server = serverRepository.findById(serverName).get()
+                server.free = true
+                serverRepository.save(server)
+            }
+        } catch (ex) {
+            return  ex
         }
     }
 
