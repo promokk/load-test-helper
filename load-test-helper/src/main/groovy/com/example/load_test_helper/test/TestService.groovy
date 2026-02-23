@@ -4,6 +4,8 @@ import com.example.load_test_helper.profile.ProfileService
 import com.example.load_test_helper.server.ServerService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Isolation
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class TestService {
@@ -19,6 +21,7 @@ class TestService {
     }
 
     // Создать тест
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     def createTest(Object test) {
             List<String> profile = []
             List<String> profileArr = profileService.profileCalculation(test["profile"])
@@ -36,6 +39,7 @@ class TestService {
     }
 
     // Удалить тест
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     def deleteTest(Integer id) {
         try {
             def server = testRepository.findById(id).get().server

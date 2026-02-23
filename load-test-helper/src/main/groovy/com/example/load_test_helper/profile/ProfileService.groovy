@@ -1,6 +1,8 @@
 package com.example.load_test_helper.profile
 
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Isolation
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ProfileService {
@@ -11,6 +13,7 @@ class ProfileService {
     }
 
     // Добавить профиль
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     def addProfile(ProfileDTO profileDto) {
         Profile profile = new Profile(
                 name: profileDto.name,

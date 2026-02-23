@@ -1,6 +1,6 @@
 package com.example.load_test_helper.server
 
-import jakarta.validation.constraints.*
+import jakarta.validation.constraints.NotBlank
 
 class ServerDTO {
     @NotBlank

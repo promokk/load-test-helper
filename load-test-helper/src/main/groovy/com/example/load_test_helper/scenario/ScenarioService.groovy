@@ -4,6 +4,8 @@ import com.example.load_test_helper.group.Group
 import com.example.load_test_helper.group.GroupDTO
 import com.example.load_test_helper.group.GroupRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Isolation
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ScenarioService {
@@ -16,22 +18,26 @@ class ScenarioService {
     }
 
     // Добавить сценарий
-    def addScenario(ScenarioDTO scenarioDto) {
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    def addScenario(ScenarioDTO scenarioDTO) {
         def scenario = new Scenario(
-                name: scenarioDto.name,
-                stand: scenarioDto.stand,
-                domain: scenarioDto.domain,
-                duration: scenarioDto.duration,
-                draft: scenarioDto.draft
+                name: scenarioDTO.name,
+                stand: scenarioDTO.stand ?: null,
+                domain: scenarioDTO.domain,
+                duration: scenarioDTO.duration,
+                draft: scenarioDTO.draft
         )
-        scenarioDto.groups.each { groupDto ->
+        scenarioDTO.groups.each { groupDTO ->
             def group = new Group(
                     scenario: scenario,
-                    profile: groupDto.profile,
-                    server: groupDto.server,
-                    domain: groupDto.domain ?: null,
-                    duration: groupDto.duration ?: null,
-                    customParam: groupDto.customParam ?: null,
+                    profile: groupDTO.profile,
+                    server: groupDTO.server,
+                    masterRun: groupDTO.masterRun ?: true,
+                    domain: groupDTO.domain ?: null,
+                    duration: groupDTO.duration ?: null,
+                    certificate: groupDTO.certificate ?: null,
+                    testParam: groupDTO.testParam ?: null,
+                    serverParam: groupDTO.serverParam ?: null
             )
             scenario.groups.add(group)
         }
@@ -39,6 +45,7 @@ class ScenarioService {
     }
 
     // Добавить группу
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     def addGroup(GroupDTO groupDTO, Scenario scenario) {
         Group group = new Group(
                 scenario: scenario,
@@ -46,19 +53,24 @@ class ScenarioService {
                 server: groupDTO.server,
                 domain: groupDTO.domain,
                 duration: groupDTO.duration,
-                customParam: groupDTO.customParam ?: null,
+                certificate: groupDTO.certificate ?: null,
+                testParam: groupDTO.testParam ?: null,
+                serverParam: groupDTO.serverParam ?: null
         )
         scenario.groups.add(group)
         return scenarioRepository.save(scenario)
     }
 
     // Редактировать группу
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     def editGroup(GroupDTO groupDTO ,Group group) {
         group.profile = groupDTO.profile
         group.server = groupDTO.server
         group.domain = groupDTO.domain
         group.duration = groupDTO.duration
-        group.customParam = groupDTO.customParam
+        group.certificate = groupDTO.certificate
+        group.testParam = groupDTO.testParam
+        group.serverParam = groupDTO.serverParam
         return groupRepository.save(group)
     }
 }

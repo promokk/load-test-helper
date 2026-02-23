@@ -1,8 +1,9 @@
 package com.example.load_test_helper.server
 
-import com.example.load_test_helper.profile.Profile
 import com.example.load_test_helper.profile.ProfileService
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.annotation.Isolation
 
 @Service
 class ServerService {
@@ -15,6 +16,7 @@ class ServerService {
     }
 
     // Добавить сервер
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     def addProfile(ServerDTO serverDto) {
         Server server = new Server(
                 name: serverDto.name,
@@ -24,6 +26,7 @@ class ServerService {
     }
 
     // Бронирование N серверов
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     def serverBookingCnt(String cnt) {
         Iterable<Server> servers = serverRepository.findByFree(true)
         try {
@@ -55,6 +58,7 @@ class ServerService {
     }
 
     // Бронирование списка серверов
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     def serverBooking(String servers) {
         def serverBusy = ""
         def serversArr = servers.split(",")
@@ -78,15 +82,21 @@ class ServerService {
     }
 
     // Отмена бронирования N серверов
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     def serverBookingCancel(List<String> serverArr) {
-        for (serverName in serverArr) {
-            Server server = serverRepository.findById(serverName).get()
-            server.free = true
-            serverRepository.save(server)
+        try {
+            for (serverName in serverArr) {
+                Server server = serverRepository.findById(serverName).get()
+                server.free = true
+                serverRepository.save(server)
+            }
+        } catch (ex) {
+            return  ex
         }
     }
 
     // Отмена бронирования всех серверов
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     def serverBookingCancelAll() {
         Iterable<Server> servers = serverRepository.findByFree(false)
         for (server in servers) {

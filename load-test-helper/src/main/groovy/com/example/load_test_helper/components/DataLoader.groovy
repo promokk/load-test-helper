@@ -21,7 +21,7 @@ class DataLoader {
     @Value('${profileListFile:profileList.dat}')
     private String profileListFile
 
-    @Value('${dbName:db_server}')
+    @Value('${dbName:load_test_helper}')
     private String dbName
 
     @Value('${userDir}')
