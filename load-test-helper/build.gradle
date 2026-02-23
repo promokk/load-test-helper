@@ -6,7 +6,7 @@ plugins {
 
 group = 'com.example.load_test_helper'
 version = '0.0.1-SNAPSHOT'
-description = 'Server availability check service'
+description = 'Application to help with load testing'
 
 java {
 	toolchain {
