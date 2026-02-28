@@ -16,7 +16,7 @@ class ServerService {
     }
 
     // Добавить сервер
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional()
     def addProfile(ServerDTO serverDto) {
         Server server = new Server(
                 name: serverDto.name,

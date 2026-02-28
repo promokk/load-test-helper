@@ -18,7 +18,7 @@ class ScenarioService {
     }
 
     // Добавить сценарий
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional()
     def addScenario(ScenarioDTO scenarioDTO) {
         def scenario = new Scenario(
                 name: scenarioDTO.name,
@@ -45,7 +45,7 @@ class ScenarioService {
     }
 
     // Добавить группу
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional()
     def addGroup(GroupDTO groupDTO, Scenario scenario) {
         Group group = new Group(
                 scenario: scenario,
@@ -62,7 +62,7 @@ class ScenarioService {
     }
 
     // Редактировать группу
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional()
     def editGroup(GroupDTO groupDTO ,Group group) {
         group.profile = groupDTO.profile
         group.server = groupDTO.server
