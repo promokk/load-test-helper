@@ -21,7 +21,7 @@ class TestService {
     }
 
     // Создать тест
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional()
     def createTest(Object test) {
             List<String> profile = []
             List<String> profileArr = profileService.profileCalculation(test["profile"])

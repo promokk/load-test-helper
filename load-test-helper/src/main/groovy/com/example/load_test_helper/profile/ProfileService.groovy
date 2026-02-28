@@ -13,7 +13,7 @@ class ProfileService {
     }
 
     // Добавить профиль
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional()
     def addProfile(ProfileDTO profileDto) {
         Profile profile = new Profile(
                 name: profileDto.name,

@@ -4,7 +4,9 @@ import com.example.load_test_helper.group.Group
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
+import org.springframework.stereotype.Repository
 
+@Repository
 interface ScenarioRepository extends CrudRepository<Scenario, String> {
     Iterable<Scenario> findByDraft(Boolean free)
 

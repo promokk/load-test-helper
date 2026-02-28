@@ -1,37 +1,35 @@
 package com.example.load_test_helper.stand
 
 import com.example.load_test_helper.domain.Domain
-import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonPropertyOrder
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
-import jakarta.persistence.FetchType
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 
-
 @Entity
-@JsonPropertyOrder(["domain", "name", "url"])
+@JsonPropertyOrder(["name", "domains"])
 @Table(name="stand", schema="load_test_helper")
 class Stand {
     @Id
-    @JsonIgnore
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @Column(name="id",nullable=false)
-    Integer id
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnore
-    @JoinColumn(name = "domain_id")
-    Domain domain
-
-    @Column(name="name", nullable=false)
+    @Column(name = "name", nullable = false)
     String name
 
-    @Column(name="url", nullable=false)
-    String url
+    @OneToMany(mappedBy = "stand", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Column(name = "domains")
+    List<Domain> domains = []
+
+    Stand() {}
+
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    Stand(@JsonProperty("name") String name,
+          @JsonProperty("domains") List<Domain> domains) {
+        this.name = name
+        this.domains = domains
+        this.domains.forEach { it.stand = this }
+    }
 }
