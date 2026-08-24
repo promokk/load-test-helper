@@ -40,7 +40,7 @@ class ProfileController {
     def getProfileById(@PathVariable("name") String name, HttpServletRequest request) {
         def profile = profileRepository.findById(name) ?: false
         if (!profile)
-            throw new NotFoundException("Профиль не найден - ${name}", request.method, request.requestURI)
+            throw new NotFoundException("Профиль не найден - ${name}")
         return profile
     }
 
@@ -51,6 +51,9 @@ class ProfileController {
             throw new BadRequestException("Неверный запрос. Get-параметр serverCount != Integer")
         Integer serverCount = cnt.toInteger()
         def profile = profileService.profileCalculation(profileName, serverCount)
+        if (profile instanceof NoSuchElementException)
+            throw new NotFoundException(
+                    "Профиль ${profileName} не найден")
         if (profile instanceof Exception)
             throw new BadRequestException(
                     "Неверный запрос. Get-параметр profileName указан неверно. Паттерн: {name} или {name}:{throughput}:{threads}:{rampUp}")

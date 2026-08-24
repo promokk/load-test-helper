@@ -31,8 +31,8 @@ class ScenarioService {
             def group = new Group(
                     scenario: scenario,
                     profile: groupDTO.profile,
-                    server: groupDTO.server,
-                    masterRun: groupDTO.masterRun ?: true,
+                    server: groupDTO.server ?: null,
+                    masterRun: groupDTO.masterRun != null ? groupDTO.masterRun : true,
                     domain: groupDTO.domain ?: null,
                     duration: groupDTO.duration ?: null,
                     certificate: groupDTO.certificate ?: null,
@@ -50,7 +50,8 @@ class ScenarioService {
         Group group = new Group(
                 scenario: scenario,
                 profile: groupDTO.profile,
-                server: groupDTO.server,
+                server: groupDTO.server ?: null,
+                masterRun: groupDTO.masterRun != null ? groupDTO.masterRun : true,
                 domain: groupDTO.domain,
                 duration: groupDTO.duration,
                 certificate: groupDTO.certificate ?: null,
@@ -66,6 +67,7 @@ class ScenarioService {
     def editGroup(GroupDTO groupDTO ,Group group) {
         group.profile = groupDTO.profile
         group.server = groupDTO.server
+        group.masterRun = groupDTO.masterRun
         group.domain = groupDTO.domain
         group.duration = groupDTO.duration
         group.certificate = groupDTO.certificate
