@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotBlank
 class GroupDTO {
     @NotBlank
     String profile
-    @NotBlank
     String server
     Boolean masterRun
     String domain
