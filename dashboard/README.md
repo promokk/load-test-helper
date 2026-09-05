@@ -40,7 +40,7 @@ PostgreSQL-схемы приложения.
 
 ![test - картинка](https://raw.githubusercontent.com/promokk/load-test-helper/main/dashboard/data/test.png)
 
-### Секция Profile / Scenario / Group (свёрнута по умолчанию)
+### Секция Profile / Scenario / Group
 - **Profile** — таблица профилей нагрузки: имя, throughput, threads, ramp up.
 - **Scenario** — таблица сценариев: имя, стенд, домен, длительность, черновик (draft), связанные группы.
 - **Group** — таблица групп: id, сценарий, сервер, профиль, master run, домен, длительность, сертификат, кастомные параметры, параметры теста/сервера.
@@ -49,14 +49,14 @@ PostgreSQL-схемы приложения.
 ![scenario - картинка](https://raw.githubusercontent.com/promokk/load-test-helper/main/dashboard/data/scenario.png)
 ![group - картинка](https://raw.githubusercontent.com/promokk/load-test-helper/main/dashboard/data/group.png)
 
-### Секция Stand / Domain / URL (свёрнута по умолчанию)
+### Секция Stand / Domain / URL
 - **Stand / Domain / URL** — таблица соответствия стендов, доменов и URL.
 
 ![stand - картинка](https://raw.githubusercontent.com/promokk/load-test-helper/main/dashboard/data/stand.png)
 
 ---
 
-## Переменные шаблонов (templating)
+## Переменные шаблонов
 
 | Переменная | Тип | Назначение |
 |---|---|---|
