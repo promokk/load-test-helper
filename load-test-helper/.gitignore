@@ -39,3 +39,4 @@ out/
 ### App ###
 logs/
 db/
+lib/
